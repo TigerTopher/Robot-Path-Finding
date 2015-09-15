@@ -7,6 +7,11 @@
 #define X_COOR_SIZE 200
 #define Y_COOR_SIZE 400
 
+int initial[2];
+int goal[2];
+int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
+int obstacleCount;                  // Number of obstacles/polygon    | I-2 count
+int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per polygon | L count
 int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an obstacle.
 
 /* Notes:
@@ -83,11 +88,6 @@ int main(){
   int k;
 
   char buffer[ARRAYSPACE_SMALL];
-  int initial[2];
-  int goal[2];
-  int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
-  int obstacleCount;                  // Number of obstacles/polygon    | I-2 count
-  int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per polygon | L count
   char strtokBuffer[2] = ",";
   char strtokBuffer2[4] = "),(";
   char *token;
@@ -116,13 +116,12 @@ int main(){
       else{
         // Store obstacles
         //(x1,y2),(x1,y2),...(xn,yn)
-        // printf("%s\n", buffer);
         token = strtok(buffer, strtokBuffer2);
 
         j = 0;
         k = 0;
         while(token != NULL){
-          // printf("%s %d %d\n", token, j, k);
+          //printf("%s %d %d\n", token, j, k);
           if(k%2 == 0){
             vertices[i-2][j][k%2] = atoi(token);
           }
