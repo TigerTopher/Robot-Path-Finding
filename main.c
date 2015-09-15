@@ -5,7 +5,7 @@
 #include<math.h>
 
 #define ARRAYSPACE_SMALL 100
-#define ARRAYSPACE_BIG 10000
+#define ARRAYSPACE_BIG 80000
 #define X_COOR_SIZE 200
 #define Y_COOR_SIZE 400
 
