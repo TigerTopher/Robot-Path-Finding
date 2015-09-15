@@ -204,7 +204,7 @@ void findObstacles(){
     }
     printf("\n%d - %d,%d\n", i, vertices[i][0][0], vertices[i][0][1]);
     printf("\n%d\n", k);
-        getchar();
+    getchar();
   }
 }
 
@@ -250,7 +250,6 @@ int main(){
         j = 0;
         k = 0;
         while(token != NULL){
-          //printf("%s %d %d\n", token, j, k);
           if(k%2 == 0){
             vertices[i-2][j][k%2] = atoi(token);
           }
