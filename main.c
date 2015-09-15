@@ -140,7 +140,7 @@ void findObstacles(){
   int i,j,k,l;
   int x1, x2; // This will be values for the boundaries of x.
   float y1, y2; // This will be values for the boundaries of y.
-  for(i=0; i <= polygonCount; i++){
+  for(i=0; i < polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
     temp_obstacle_count = 0;
     for(j=0; j < verticesSize[i]; j++){
