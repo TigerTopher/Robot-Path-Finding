@@ -40,7 +40,8 @@ int temp_obstacle_count = 0;
   Develop 5 Test cases.
 
   Check Input Validity
-    a.) Is the initial state or the goal state enclosed inside an obstacle?
+    a.) If the polygon a convex polygon? 
+    b.) Is the initial state or the goal state enclosed inside an obstacle?
 */
 
 void removeEnter(char* buffer){

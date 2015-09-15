@@ -12,7 +12,12 @@
 (0,0),(10,0),(10,5),(5,10),(0,5)
 (50,50),(50, 60),(60,60),(60,50)
 ```
-* Polygons as input is assumed to be simple polygons only, not complex polygons.
+(0,0) is the initial state.
+(199,399) is the goal state.
+The third line gives the 5 vertices of a polygon/obstacle.
+The fourth line gives the 4 vertices of another polygon/obstacle.
+
+* Polygons as input is assumed to be simple, convex polygons only, not complex, concave polygons.
 
 * For old C compilers. compile C file using command `$ gcc main.c -lm -o main.exe`. This includes `#include<math.h>` library. This is needed since I used its floor and ceiling function.
 
