@@ -120,7 +120,7 @@ int traceObstacle(int x1, int y1, int x2, int y2){
       //printf("%d %d %d %d", x1, y1, x2, y2);
       //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
       temp_obstacle[temp_obstacle_count][0] = i;
-      temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)(*1.0)/(x2 - x1))(i - x1) + y1
+      temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
       temp_obstacle_count++;
     }
   }
@@ -138,7 +138,7 @@ void findObstacles(){
   int i,j;
   for(i=0; i < polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
-
+    temp_obstacle_count = 0;
     for(j=0; j < verticesSize[i]; j++){
       if(j != verticesSize[i] - 1){
         // Trace current with next
@@ -149,6 +149,12 @@ void findObstacles(){
         traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
       }
     }
+    /*
+    for(j=0; j<temp_obstacle_count; j++){
+      printf("(%.2f,%.2f) ", temp_obstacle[j][0], temp_obstacle[j][1]);
+      if(j%5 == 0)
+        printf("\n");
+    }*/
     /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
 
   }
