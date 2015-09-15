@@ -4,6 +4,11 @@
 #include<string.h>
 
 #define ARRAYSPACE_SMALL 100
+#define X_COOR_SIZE 200
+#define Y_COOR_SIZE 400
+
+int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an obstacle.
+
 /* Notes:
   Need to use the following algorithms:
   a.) BFS
@@ -35,7 +40,7 @@ void removeEnter(char* buffer){
   }
 }
 
-void formatString1(char* buffer){
+void formatString(char* buffer){
   // This parses initial and goal state
   int i;
 
@@ -49,8 +54,24 @@ void formatString1(char* buffer){
   return;
 }
 
-int traceObstacle(int x, int y){
+int traceObstacle(int x1, int y1, int x2, int y2){
+  int i;
 
+  if( x1 == x2 ){
+    // Slope is zero in this case.
+    for(i = y1; i<=y2; i++){
+      obstacleCoordinates[x1][i] = 1;
+    }
+  }
+  /*
+    y - y1 = m ( x - x1)
+    y - y1 = [(y2 - y1)/(x2 - x1)]*(x - x1)
+    y = [ [(y2 - y1)/(x2 - x1)]*(x - x1) ] + y1
+    Given an x, may formula na ako for y, for all x that are natural numbers from x1 -> x2
+    So magkakaroon ako ng y floats (or maybe natural numbers as well).
+    I'll have x-y pairs ngayon. I will store them all.
+
+  */
 }
 
 int main(){
@@ -78,14 +99,14 @@ int main(){
     for(i = 0; fgets(buffer,ARRAYSPACE_SMALL,fp) != NULL; i++){
       removeEnter(buffer);
       if(i == 0){
-        formatString1(buffer);
+        formatString(buffer);
         token = strtok(buffer, strtokBuffer);
         initial[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         initial[1] = atoi(token);
       }
       else if(i == 1){
-        formatString1(buffer);
+        formatString(buffer);
         token = strtok(buffer, strtokBuffer);
         goal[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
@@ -117,6 +138,7 @@ int main(){
     }
     obstacleCount = i-2;                  // (i - 2) Dahil minus initial, goal.
 
+    traceObstacle(1,0,1,2);
     /* //How to print the polygons...
     for(i = 0; i < obstacleCount; i++){
       printf("Polygon %d: ", i);
@@ -126,8 +148,7 @@ int main(){
         }
         printf("\n");
       }
-    }
-    */
+    }*/
 
   }
 }
