@@ -4,15 +4,22 @@
 #include<string.h>
 
 #define ARRAYSPACE_SMALL 100
+#define ARRAYSPACE_BIG 1000
 #define X_COOR_SIZE 200
 #define Y_COOR_SIZE 400
 
 int initial[2];
 int goal[2];
 int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
-int obstacleCount;                  // Number of obstacles/polygon    | I-2 count
+int polygonCount;                  // Number of obstacles/polygon    | I-2 count
 int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per polygon | L count
 int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an obstacle.
+
+float temp_obstacle[ARRAYSPACE_BIG][2];
+int temp_obstacle_count = 0;
+
+// This is temporary variable that can handle floats in building the obstacle.
+// I would put x-y pairs here
 
 /* Notes:
   Need to use the following algorithms:
@@ -61,11 +68,52 @@ void formatString(char* buffer){
 
 int traceObstacle(int x1, int y1, int x2, int y2){
   int i;
+  int j = temp_obstacle_count;
+  int temp;
+
+  printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
   if( x1 == x2 ){
-    // Slope is zero in this case.
-    for(i = y1; i<=y2; i++){
-      obstacleCoordinates[x1][i] = 1;
+    if(y1 > y2){
+      temp = y1;
+      y1 = y2;
+      y2 = temp;
+      temp = x1;
+      x1 = x2;
+      x2 = temp;
+    }
+
+    else if(y1 == y2){ // If vertex is same
+      /// obstacleCoordinates[x1][y1] = 1;
+      temp_obstacle[temp_obstacle_count][0] = x1;
+      temp_obstacle[temp_obstacle_count][1] = y1;
+      temp_obstacle_count++;
+    }
+
+    // CASE 1: Slope is zero
+    for(i = y1; i <= y2; i++){
+      // obstacleCoordinates[x1][i] = 1;
+      //printf("Marking: %d %d\n", x1, i);
+      temp_obstacle[temp_obstacle_count][0] = x1;
+      temp_obstacle[temp_obstacle_count][1] = i;
+      temp_obstacle_count++;
+    }
+  }
+  else{
+    // CASE 2: Slope is nonzero
+    if(x1 > x2){
+      temp = x1;
+      x1 = x2;
+      x2 = temp;
+      temp = y1;
+      y1 = y2;
+      y2 = temp;
+    }
+    for(i = x1; i <= x2; i++){
+      printf("%d %d %d %d", x1, y1, x2, y2);
+      printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
+      //temp_obstacle[temp_obstacle_count][0] = i;
+      //temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)(*1.0)/(x2 - x1))(i - x1) + y1
     }
   }
   /*
@@ -77,6 +125,30 @@ int traceObstacle(int x1, int y1, int x2, int y2){
     I'll have x-y pairs ngayon. I will store them all.
 
   */
+}
+
+void findObstacles(){
+  /* Idea:
+    Kapag nakuha mo na lahat nung edges nung polygon,
+    Saka natin itrace from top to bottom.
+    Top would be the vertex with highest value for y.
+    Lowest would be... lowest value for y.
+  */
+  int i,j;
+  for(i=0; i < polygonCount; i++){
+    for(j=0; j < verticesSize[i]; j++){
+      if(j != verticesSize[i] - 1){
+        // Trace current with next
+        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][j+1][0],vertices[i][j+1][1]);
+      }
+      else{
+        // Trace current with first
+        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
+      }
+    }
+  }
+  /* Do tracing here*/
+
 }
 
 int main(){
@@ -132,14 +204,13 @@ int main(){
           k++;
           token = strtok(NULL, strtokBuffer2);
         }
-        verticesSize[i-2] = k/2;
+        verticesSize[i-2] = (k/2);
       }
     }
-    obstacleCount = i-2;                  // (i - 2) Dahil minus initial, goal.
-
-    traceObstacle(1,0,1,2);
+    polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
+    findObstacles();
     /* //How to print the polygons...
-    for(i = 0; i < obstacleCount; i++){
+    for(i = 0; i < polygonCount; i++){
       printf("Polygon %d: ", i);
       for(j = 0; j < verticesSize[i]; j++){
         for(k = 0; k < 2; k++){
