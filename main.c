@@ -2,9 +2,10 @@
 #include<stdlib.h>
 #include<time.h>
 #include<string.h>
+#include<math.h>
 
 #define ARRAYSPACE_SMALL 100
-#define ARRAYSPACE_BIG 1000
+#define ARRAYSPACE_BIG 10000
 #define X_COOR_SIZE 200
 #define Y_COOR_SIZE 400
 
@@ -41,6 +42,7 @@ int temp_obstacle_count = 0;
   Check Input Validity
     a.) Is the initial state or the goal state enclosed inside an obstacle?
 */
+
 void removeEnter(char* buffer){
   int i;
 
@@ -135,8 +137,10 @@ void findObstacles(){
     Kailangan natin yung mga vertex enclosed. Kaya round-up sa lowest tapos round-down sa highest.
     Magiging natural number na i-coconsider na sa coordinate system natin.
   */
-  int i,j;
-  for(i=0; i < polygonCount; i++){
+  int i,j,k,l;
+  int x1, x2; // This will be values for the boundaries of x.
+  float y1, y2; // This will be values for the boundaries of y.
+  for(i=0; i <= polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
     temp_obstacle_count = 0;
     for(j=0; j < verticesSize[i]; j++){
@@ -149,16 +153,59 @@ void findObstacles(){
         traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
       }
     }
-    /*
-    for(j=0; j<temp_obstacle_count; j++){
-      printf("(%.2f,%.2f) ", temp_obstacle[j][0], temp_obstacle[j][1]);
-      if(j%5 == 0)
-        printf("\n");
-    }*/
     /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
+    // Get range of x1 and x2 by finding least and highest value of x
+    x1 = 999999;
+    x2 = 0;
+    for(j=0; j<temp_obstacle_count;j++){
+      if(temp_obstacle[j][0] <= x1){
+        x1 = temp_obstacle[j][0];
+      }
+      if(temp_obstacle[j][0] >= x2){
+        x2 = temp_obstacle[j][0];
+      }
+    }
+    printf("Lowest value is %d, Highest value is %d", x1, x2);
+    for(j=x1; j<=x2; j++){   // Start from x1 -> x2
+      // Find y1 (lowest) and y2 (highest) points paired with x1...
+      y1 = 999999;
+      y2 = 0;
+      for(k=0; k<temp_obstacle_count; k++){
+        if(temp_obstacle[k][0] == j){
+          // Consider y now
+          if(temp_obstacle[k][1] <= y1){
+            y1 = temp_obstacle[k][1];
+          }
+          if(temp_obstacle[k][1] >= y2){
+            y2 = temp_obstacle[k][1];
+          }
+        }
+      }
+      printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
+      // Now that we know y, let's fill the obstacles
+      if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
+        for(k=(int)ceil(y1);k<=(int)floor(y2); k++){
+          obstacleCoordinates[j][k] = 1;
+        }
+      }
+      else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
+        obstacleCoordinates[j][(int)y1] = 1;
+      }
+    }
 
+    k = 0;
+    for(j=0; j<X_COOR_SIZE; j++){
+      for(l=0; l<Y_COOR_SIZE; l++){
+        if(obstacleCoordinates[j][l] == 1){
+          printf("(%d,%d)\n", j, l);
+          k++;
+        }
+      }
+    }
+    printf("\n%d - %d,%d\n", i, vertices[i][0][0], vertices[i][0][1]);
+    printf("\n%d\n", k);
+        getchar();
   }
-
 }
 
 int main(){
@@ -219,17 +266,6 @@ int main(){
     }
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
     findObstacles();
-    /* //How to print the polygons...
-    for(i = 0; i < polygonCount; i++){
-      printf("Polygon %d: ", i);
-      for(j = 0; j < verticesSize[i]; j++){
-        for(k = 0; k < 2; k++){
-          printf("%d ", vertices[i][j][k]);
-        }
-        printf("\n");
-      }
-    }*/
-
   }
 }
 
