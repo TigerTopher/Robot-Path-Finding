@@ -70,7 +70,14 @@ int traceObstacle(int x1, int y1, int x2, int y2){
   int i;
   int j = temp_obstacle_count;
   int temp;
-
+  /*Idea:
+  y - y1 = m ( x - x1)
+  y - y1 = [(y2 - y1)/(x2 - x1)]*(x - x1)
+  y = [ [(y2 - y1)/(x2 - x1)]*(x - x1) ] + y1
+  Given an x, may formula na ako for y, for all x that are natural numbers from x1 -> x2
+  So magkakaroon ako ng y floats (or maybe natural numbers as well).
+  I'll have x-y pairs ngayon. I will store them all.
+  */
   printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
   if( x1 == x2 ){
@@ -93,7 +100,7 @@ int traceObstacle(int x1, int y1, int x2, int y2){
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
       // obstacleCoordinates[x1][i] = 1;
-      //printf("Marking: %d %d\n", x1, i);
+      printf("Marking: %d %d\n", x1, i);
       temp_obstacle[temp_obstacle_count][0] = x1;
       temp_obstacle[temp_obstacle_count][1] = i;
       temp_obstacle_count++;
@@ -110,32 +117,28 @@ int traceObstacle(int x1, int y1, int x2, int y2){
       y2 = temp;
     }
     for(i = x1; i <= x2; i++){
-      printf("%d %d %d %d", x1, y1, x2, y2);
-      printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
-      //temp_obstacle[temp_obstacle_count][0] = i;
-      //temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)(*1.0)/(x2 - x1))(i - x1) + y1
+      //printf("%d %d %d %d", x1, y1, x2, y2);
+      //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
+      temp_obstacle[temp_obstacle_count][0] = i;
+      temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)(*1.0)/(x2 - x1))(i - x1) + y1
+      temp_obstacle_count++;
     }
   }
-  /*
-    y - y1 = m ( x - x1)
-    y - y1 = [(y2 - y1)/(x2 - x1)]*(x - x1)
-    y = [ [(y2 - y1)/(x2 - x1)]*(x - x1) ] + y1
-    Given an x, may formula na ako for y, for all x that are natural numbers from x1 -> x2
-    So magkakaroon ako ng y floats (or maybe natural numbers as well).
-    I'll have x-y pairs ngayon. I will store them all.
-
-  */
 }
 
 void findObstacles(){
   /* Idea:
     Kapag nakuha mo na lahat nung edges nung polygon,
-    Saka natin itrace from top to bottom.
-    Top would be the vertex with highest value for y.
-    Lowest would be... lowest value for y.
+    Saka natin itrace from bottom to top, from x1 -> x2
+    Find (x1, __) // Lowest -> I-round up yung float dito
+    Find (x1, __) // Highest -> I-round down
+    Kailangan natin yung mga vertex enclosed. Kaya round-up sa lowest tapos round-down sa highest.
+    Magiging natural number na i-coconsider na sa coordinate system natin.
   */
   int i,j;
   for(i=0; i < polygonCount; i++){
+    /* Reinitialize temp_obstacle here*/
+
     for(j=0; j < verticesSize[i]; j++){
       if(j != verticesSize[i] - 1){
         // Trace current with next
@@ -146,8 +149,9 @@ void findObstacles(){
         traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
       }
     }
+    /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
+
   }
-  /* Do tracing here*/
 
 }
 
