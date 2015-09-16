@@ -4,6 +4,8 @@
 #include<string.h>
 #include<math.h>
 
+/* Christopher Vizcarra*/
+
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
 #define X_COOR_SIZE 200
@@ -13,7 +15,7 @@ int initial[2];
 int goal[2];
 int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
 int polygonCount;                  // Number of obstacles/polygon    | I-2 count
-int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per polygon | L count
+int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per  polygon | L count
 int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an obstacle.
 
 float temp_obstacle[ARRAYSPACE_BIG][2];
@@ -40,9 +42,17 @@ int temp_obstacle_count = 0;
   Develop 5 Test cases.
 
   Check Input Validity
-    a.) If the polygon a convex polygon? 
+    a.) If the polygon a convex polygon?
     b.) Is the initial state or the goal state enclosed inside an obstacle?
 */
+
+int checkInputValidity(int x, int y){
+  int i;
+  int j;
+  if(obstacleCoordinates[x][y] == 1)
+    return 0;
+  return 1;
+}
 
 void removeEnter(char* buffer){
   int i;
@@ -81,7 +91,7 @@ int traceObstacle(int x1, int y1, int x2, int y2){
   So magkakaroon ako ng y floats (or maybe natural numbers as well).
   I'll have x-y pairs ngayon. I will store them all.
   */
-  printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
+  //printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
   if( x1 == x2 ){
     if(y1 > y2){
@@ -103,7 +113,7 @@ int traceObstacle(int x1, int y1, int x2, int y2){
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
       // obstacleCoordinates[x1][i] = 1;
-      printf("Marking: %d %d\n", x1, i);
+      //printf("Marking: %d %d\n", x1, i);
       temp_obstacle[temp_obstacle_count][0] = x1;
       temp_obstacle[temp_obstacle_count][1] = i;
       temp_obstacle_count++;
@@ -166,7 +176,7 @@ void findObstacles(){
         x2 = temp_obstacle[j][0];
       }
     }
-    printf("Lowest value is %d, Highest value is %d", x1, x2);
+    //printf("Lowest value is %d, Highest value is %d", x1, x2);
     for(j=x1; j<=x2; j++){   // Start from x1 -> x2
       // Find y1 (lowest) and y2 (highest) points paired with x1...
       y1 = 999999;
@@ -182,7 +192,7 @@ void findObstacles(){
           }
         }
       }
-      printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
+      //printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
       // Now that we know y, let's fill the obstacles
       if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
         for(k=(int)ceil(y1);k<=(int)floor(y2); k++){
@@ -198,14 +208,13 @@ void findObstacles(){
     for(j=0; j<X_COOR_SIZE; j++){
       for(l=0; l<Y_COOR_SIZE; l++){
         if(obstacleCoordinates[j][l] == 1){
-          printf("(%d,%d)\n", j, l);
+          //printf("(%d,%d)\n", j, l);
           k++;
         }
       }
     }
-    printf("\n%d - %d,%d\n", i, vertices[i][0][0], vertices[i][0][1]);
-    printf("\n%d\n", k);
-    getchar();
+    //printf("\n%d - %d,%d\n", i, vertices[i][0][0], vertices[i][0][1]);
+    //printf("\n%d\n", k);
   }
 }
 
@@ -216,12 +225,14 @@ int main(){
 
   int j;
   int k;
+  int flag = 0;
 
   char buffer[ARRAYSPACE_SMALL];
   char strtokBuffer[2] = ",";
   char strtokBuffer2[4] = "),(";
   char *token;
 
+  /* File Parsing, Initialization, Input Validation*/
   fp = fopen("input.txt", "r");
   if(fp == NULL)
     perror("Error opening file.");
@@ -234,6 +245,10 @@ int main(){
         initial[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         initial[1] = atoi(token);
+        if((initial[0] < 0) || (initial[1] < 0) || (initial[0] >= X_COOR_SIZE) || (initial[1] >= Y_COOR_SIZE)){
+          printf("Invalid initial state. Not in range.\n");
+          flag = 0;
+        }
       }
       else if(i == 1){
         formatString(buffer);
@@ -241,6 +256,10 @@ int main(){
         goal[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         goal[1] = atoi(token);
+        if((goal[0] < 0) || (goal[1] < 0) || (goal[0] >= X_COOR_SIZE) || (goal[1] >= Y_COOR_SIZE)){
+          printf("Invalid goal state. Not in range.\n");
+          flag = 0;
+        }
       }
 
       else{
@@ -265,8 +284,28 @@ int main(){
       }
     }
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
-    findObstacles();
+    findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
+
+    // Let's validate input for initial and goal state.
+
+    if(checkInputValidity(initial[0], initial[1]) == 0){
+      printf("Initial state is inside an obstacle.\n");
+      flag = 0;
+    }
+
+    if(checkInputValidity(initial[0], initial[1]) == 0){
+        printf("Goal state is inside an obstacle.\n");
+        flag = 0;
+    }
+
+    if(flag == 0){
+      printf("Please fix input file.\n");
+    }
+
   }
+
+
+
 }
 
 /*Programmed by: Christopher Vizcarra*/
