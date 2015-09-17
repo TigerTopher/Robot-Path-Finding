@@ -4,7 +4,8 @@
 #include<string.h>
 #include<math.h>
 
-/* Christopher Vizcarra*/
+/* John Louise Tan
+  Christopher Vizcarra*/
 
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
@@ -23,36 +24,6 @@ int temp_obstacle_count = 0;
 
 // This is temporary variable that can handle floats in building the obstacle.
 // I would put x-y pairs here
-
-/* Notes:
-  Need to use the following algorithms:
-  a.) BFS
-  b.) DFS
-  c.) A* Search
-
-  We have an m x n grid.
-  200 x 400
-
-  Run a number of test cases of different complexity in terms of:
-  a.) Number,
-  b.) Shape,
-  c.) Size,
-  d.) Difficulty of Solution
-
-  Develop 5 Test cases.
-
-  Check Input Validity
-    a.) If the polygon a convex polygon?
-    b.) Is the initial state or the goal state enclosed inside an obstacle?
-*/
-
-int checkInputValidity(int x, int y){
-  int i;
-  int j;
-  if(obstacleCoordinates[x][y] == 1)
-    return 0;
-  return 1;
-}
 
 void removeEnter(char* buffer){
   int i;
@@ -195,9 +166,8 @@ void findObstacles(){
       //printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
       // Now that we know y, let's fill the obstacles
       if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
-        for(k=(int)ceil(y1);k<=(int)floor(y2); k++){
-          obstacleCoordinates[j][k] = 1;
-        }
+        obstacleCoordinates[j][(int)ceil(y1)] = 1;
+        obstacleCoordinates[j][(int)floor(y2)] = 1;
       }
       else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
         obstacleCoordinates[j][(int)y1] = 1;
@@ -245,9 +215,9 @@ int main(){
         initial[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         initial[1] = atoi(token);
-        if((initial[0] < 0) || (initial[1] < 0) || (initial[0] >= X_COOR_SIZE) || (initial[1] >= Y_COOR_SIZE)){
+        if((initial[0] <= 0) || (initial[1] <= 0) || (initial[0] > X_COOR_SIZE) || (initial[1] > Y_COOR_SIZE)){
           printf("Invalid initial state. Not in range.\n");
-          flag = 0;
+          flag = 1;
         }
       }
       else if(i == 1){
@@ -256,9 +226,9 @@ int main(){
         goal[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         goal[1] = atoi(token);
-        if((goal[0] < 0) || (goal[1] < 0) || (goal[0] >= X_COOR_SIZE) || (goal[1] >= Y_COOR_SIZE)){
+        if((goal[0] <= 0) || (goal[1] <= 0) || (goal[0] > X_COOR_SIZE) || (goal[1] > Y_COOR_SIZE)){
           printf("Invalid goal state. Not in range.\n");
-          flag = 0;
+          flag = 1;
         }
       }
 
@@ -286,26 +256,17 @@ int main(){
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
     findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
 
-    // Let's validate input for initial and goal state.
-
-    if(checkInputValidity(initial[0], initial[1]) == 0){
-      printf("Initial state is inside an obstacle.\n");
-      flag = 0;
-    }
-
-    if(checkInputValidity(initial[0], initial[1]) == 0){
-        printf("Goal state is inside an obstacle.\n");
-        flag = 0;
-    }
-
-    if(flag == 0){
+    if(flag == 1){
       printf("Please fix input file.\n");
     }
 
+    for(i = 0; i < X_COOR_SIZE; i++){
+      for(j = 0; j < Y_COOR_SIZE; j++){
+        if(obstacleCoordinates[i][j] == 1)
+          printf("%d, %d\n", i,j);
+      }
+    }
   }
-
-
-
 }
 
 /*Programmed by: Christopher Vizcarra*/
