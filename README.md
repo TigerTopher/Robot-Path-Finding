@@ -1,5 +1,5 @@
 # CS 180 MP 1
-* Programmed by: Christopher Ivan Vizcarra
+* Programmed by: John Louise Tan and Christopher Ivan Vizcarra
 * CS 180 THV
 * Submitted to: Professor Carlo Raquel
 * This file is formatted using a markdown language.
@@ -22,5 +22,7 @@ The fourth line gives the 4 vertices of another polygon/obstacle.
 * For old C compilers. compile C file using command `$ gcc main.c -lm -o main.exe`. This includes `#include<math.h>` library. This is needed since I used its floor and ceiling function.
 
 * Size is assumed to be 200x400.
+
+* Smart-input is assumed
 
 * Just change `#define` values to change size and more.
