@@ -64,7 +64,9 @@ int traceObstacle(int x1, int y1, int x2, int y2){
   */
   //printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
-  if( x1 == x2 ){
+  // Case 1: Slope is undefined...
+  if( x1 == x2 )
+  {
     if(y1 > y2){
       temp = y1;
       y1 = y2;
@@ -76,18 +78,14 @@ int traceObstacle(int x1, int y1, int x2, int y2){
 
     else if(y1 == y2){ // If vertex is same
       /// obstacleCoordinates[x1][y1] = 1;
-      temp_obstacle[temp_obstacle_count][0] = x1;
-      temp_obstacle[temp_obstacle_count][1] = y1;
-      temp_obstacle_count++;
+      obstacleCoordinates[x1][y1] = 1;
     }
 
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
       // obstacleCoordinates[x1][i] = 1;
       //printf("Marking: %d %d\n", x1, i);
-      temp_obstacle[temp_obstacle_count][0] = x1;
-      temp_obstacle[temp_obstacle_count][1] = i;
-      temp_obstacle_count++;
+      obstacleCoordinates[x1][i] = 1;
     }
   }
   else{
