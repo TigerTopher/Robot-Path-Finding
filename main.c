@@ -9,8 +9,8 @@
 
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
-#define X_COOR_SIZE 200
-#define Y_COOR_SIZE 400
+#define X_COOR_SIZE 400
+#define Y_COOR_SIZE 200
 
 int initial[2];
 int goal[2];
@@ -254,18 +254,25 @@ int main(){
       }
     }
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
+    fclose(fp);
     findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
 
     if(flag == 1){
       printf("Please fix input file.\n");
     }
 
-    for(i = 0; i < X_COOR_SIZE; i++){
-      for(j = 0; j < Y_COOR_SIZE; j++){
+    fp = fopen("output1.txt", "w");
+    for(j = Y_COOR_SIZE - 1; j >= 0; j--){
+      for(i = 0; i < X_COOR_SIZE; i++){
+        fprintf(fp, "%d ", obstacleCoordinates[i][j]);
         if(obstacleCoordinates[i][j] == 1)
-          printf("%d, %d\n", i,j);
+        {
+          printf("(%d, %d)", i, j);
+        }
       }
+      fprintf(fp, "\n");
     }
+    fclose(fp);
   }
 }
 
