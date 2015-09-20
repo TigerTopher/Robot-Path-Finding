@@ -46,19 +46,16 @@ The fourth line gives the 4 vertices of another polygon/obstacle.
 
 * Just change `#define` values to change size and more.
 
-## Data Structure:
-* Implement a doubly-linked list with front pointer and rear pointer.
-
-### Why Not Doubly-Linked List (abbr. DL / DL-L)?
+## Data Structure Documentation:
+### Why Not Implement Doubly-Linked List (abbr. DL / DL-L)?
 ---
 #### Pros:
-* ** Convenience for Fringe Representation: ** DL-L can represent both Stack and Queue. Moreover, only one allocation function and pointer type are needed. 
+  * ** Convenience for Fringe Representation: ** DL-L can represent both Stack and Queue. Moreover, only one allocation function and pointer type are needed.
 
-* Same isEmpty() Function. Empty if Front and Back points the same node
+  * Same isEmpty() Function. Empty if Front and Back points the same node
 
 #### Cons:
-* ** Performance Issue:** It is more efficient to split the Data Structure into Stack and Queue, since it will omit the unnecessary prev pointer. This saves us 8 bytes for every node.
-
+  * ** Performance Issue:** It is more efficient to split the Data Structure into a Stack and a Queue, since it will omit the unnecessary "prev" pointer. This saves us 8 bytes for every node!
 
 ### Queue:
 ---
@@ -66,8 +63,54 @@ The fourth line gives the 4 vertices of another polygon/obstacle.
 * Remove (Dequeue) : Remove sa may back
 * checkNext : Check node napinopoint ni front
 
+Queue Functions:
+
+1. `void enqueue(NODE_POINTER* FRONT, NODE_POINTER* REAR, int x1, int y1);`
+  * Sample function call: `enqueue(&Q1_FRONT, &Q1_REAR, input1, input2);`
+2. `int dequeue(NODE_POINTER* FRONT, NODE_POINTER* REAR);`
+  * The x and y values of the dequeued node are placed in global variables variable1 and variable2.
+  * Sample function call:
+  `dequeue(&Q1_FRONT, &Q1_REAR);`
+3. `int checkFront(NODE_POINTER FRONT);`
+  * Returns 0 if FRONT points to NULL, 1 if otherwise.
+  * If 1, Front x,y values are placed in global variables variable1 and variable2.
+  * Sample function call:
+  `checkFront(Q1_FRONT);`
+4. `int checkRear(NODE_POINTER REAR);`
+  * Returns 0 if REAR points to NULL, 1 if otherwise.
+  * If 1, Rear x,y values are placed in global variables variable1 and variable2.
+  * Sample function call:
+  `checkRear(Q1_REAR);`
+5. `int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);`
+  * Returns 1 if Empty, 0 if otherwise.
+  * Sample function call:
+  `isEmptyQueue(&Q1_REAR, &Q1_FRONT)`
+
+
 ### Stack:
 ---
 * Insert (Push) : Insert sa may front (top)
 * Remove (Pop) : Remove sa may front (top)
 * checkNext: Check node napinopoint ni front
+
+Stack Functions:
+
+1. `void push(NODE_POINTER* TOP, int x1, int y1);`
+  * If 0, this means current pointer points to NULL.
+  * If 1, popped or checkTop values can be found in global variable1 and variable2
+  * Sample function call:
+  `push(&S1_TOP, input1, input2);`
+2. `int pop(NODE_POINTER* TOP);`
+  * Returns 0 if there is nothing to pop.
+  * Returns 1 if otherwise. Popped x,y values are placed in global variables variable1 and variable2.
+  * Sample function call:
+  `pop(&S1_TOP);`
+3. `int checkTop(NODE_POINTER TOP);`
+  * Return 0 if TOP points to NULL
+  * Returns 1 if otherwise. Top x,y values are placed in global variables variable1 and variable2.
+  * Sample function call:
+  `checkTop(S1_TOP);`
+4. `int isEmptyStack(NODE_POINTER* TOP);`
+  * Returns 1 if Empty, 0 if otherwise.
+  * Sample function call:
+  `isEmptyStack(&S1_TOP)`

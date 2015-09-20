@@ -51,13 +51,11 @@ LIST_NODE* newNode(int x1, int y1);
 
 // For Stack:
 void push(NODE_POINTER* TOP, int x1, int y1);
-
 // POP and CHECKTOP returns 1 or 0.
 // If 0, this means current pointer points to NULL.
 // If 1, popped or checkTop values can be found in global variable1 and variable2
 int pop(NODE_POINTER* TOP);  // Output values are placed in global variables variable1 and variable2.
 int checkTop(NODE_POINTER TOP); // Output values are placed in global variables variable1 and variable2.
-
 int isEmptyStack(NODE_POINTER* TOP);
 
 // This is temporary variable that can handle floats in building the obstacle.
