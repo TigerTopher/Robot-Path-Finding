@@ -4,7 +4,22 @@
 * Submitted to: Professor Carlo Raquel
 * This file is formatted using a markdown language.
 
-## Motivation:
+## Thought of the Day + Motivation:
+
+```
+1 Corinthians 13:4-8  New International Version (NIV)
+
+4 Love is patient, love is kind. It does not envy, it does not boast, it is not proud.
+
+5 It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs.
+
+6 Love does not delight in evil but rejoices with the truth.
+
+7 It always protects, always trusts, always hopes, always perseveres.
+
+8 Love never fails. But where there are prophecies, they will cease; where there are tongues, they will be stilled; where there is knowledge, it will pass away.
+```
+
 ![alt text](https://scontent-hkg3-1.xx.fbcdn.net/hphotos-xfp1/v/t1.0-9/s720x720/12011275_1078573155488513_5717876656930667884_n.jpg?oh=8e1f98b525f48f2f4beb9829f73dc5b6&oe=5699AF8B)
 ![alt text](https://scontent-hkg3-1.xx.fbcdn.net/hphotos-xfl1/v/t1.0-9/s720x720/11986324_420068248198844_1413401433763077431_n.jpg?oh=f47c41b5cb595abe72939e1e9ca300cb&oe=569966C8)
 
