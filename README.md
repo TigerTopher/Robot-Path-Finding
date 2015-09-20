@@ -45,3 +45,29 @@ The fourth line gives the 4 vertices of another polygon/obstacle.
 * Smart-input is assumed
 
 * Just change `#define` values to change size and more.
+
+## Data Structure:
+* Implement a doubly-linked list with front pointer and rear pointer.
+
+### Why Not Doubly-Linked List (abbr. DL / DL-L)?
+---
+#### Pros:
+* ** Convenience for Fringe Representation: ** DL-L can represent both Stack and Queue. Moreover, only one allocation function and pointer type are needed. 
+
+* Same isEmpty() Function. Empty if Front and Back points the same node
+
+#### Cons:
+* ** Performance Issue:** It is more efficient to split the Data Structure into Stack and Queue, since it will omit the unnecessary prev pointer. This saves us 8 bytes for every node.
+
+
+### Queue:
+---
+* Insert (Enqueue) : Insert sa may front
+* Remove (Dequeue) : Remove sa may back
+* checkNext : Check node napinopoint ni front
+
+### Stack:
+---
+* Insert (Push) : Insert sa may front (top)
+* Remove (Pop) : Remove sa may front (top)
+* checkNext: Check node napinopoint ni front
