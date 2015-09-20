@@ -7,11 +7,17 @@
 /* John Louise Tan
   Christopher Vizcarra*/
 
+// Macro Definition
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
 #define X_COOR_SIZE 200
 #define Y_COOR_SIZE 400
 
+// Function Prototyping
+
+// Typedefs
+
+// Global Variables
 int initial[2];
 int goal[2];
 int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
@@ -264,6 +270,7 @@ int main(){
           printf("%d, %d\n", i,j);
       }
     }
+
   }
 }
 
