@@ -6,6 +6,7 @@
 
 ## Motivation:
 ![alt text](https://scontent-hkg3-1.xx.fbcdn.net/hphotos-xfp1/v/t1.0-9/s720x720/12011275_1078573155488513_5717876656930667884_n.jpg?oh=8e1f98b525f48f2f4beb9829f73dc5b6&oe=5699AF8B)
+![alt text](https://scontent-hkg3-1.xx.fbcdn.net/hphotos-xfp1/v/t1.0-9/s720x720/12011275_1078573155488513_5717876656930667884_n.jpg?oh=8e1f98b525f48f2f4beb9829f73dc5b6&oe=5699AF8B)
 
 ## Important Notes:
 * Input is found in input.txt . Be sure to create it or else the program won't run. Below is an example of an input.txt file.
