@@ -64,7 +64,9 @@ int traceObstacle(int x1, int y1, int x2, int y2){
   */
   //printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
-  if( x1 == x2 ){
+  // Case 1: Slope is undefined...
+  if( x1 == x2 )
+  {
     if(y1 > y2){
       temp = y1;
       y1 = y2;
@@ -76,36 +78,53 @@ int traceObstacle(int x1, int y1, int x2, int y2){
 
     else if(y1 == y2){ // If vertex is same
       /// obstacleCoordinates[x1][y1] = 1;
-      temp_obstacle[temp_obstacle_count][0] = x1;
-      temp_obstacle[temp_obstacle_count][1] = y1;
-      temp_obstacle_count++;
+      obstacleCoordinates[x1][y1] = 1;
     }
 
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
       // obstacleCoordinates[x1][i] = 1;
-      //printf("Marking: %d %d\n", x1, i);
-      temp_obstacle[temp_obstacle_count][0] = x1;
-      temp_obstacle[temp_obstacle_count][1] = i;
-      temp_obstacle_count++;
+      printf("Marking: %d %d\n", x1, i);
+      obstacleCoordinates[x1][i] = 1;
     }
   }
   else{
     // CASE 2: Slope is nonzero
-    if(x1 > x2){
-      temp = x1;
-      x1 = x2;
-      x2 = temp;
-      temp = y1;
-      y1 = y2;
-      y2 = temp;
+    if(((float)(y2 - y1)/(float)(x2 - x1)) <= 1 && ((float)(y2 - y1)/(float)(x2 - x1)) >= -1)
+    {
+      if(x1 > x2){
+        temp = x1;
+        x1 = x2;
+        x2 = temp;
+        temp = y1;
+        y1 = y2;
+        y2 = temp;
+      }
+      for(i = x1; i <= x2; i++){
+        //printf("%d %d %d %d", x1, y1, x2, y2);
+        //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
+        temp_obstacle[temp_obstacle_count][0] = i;
+        temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
+        temp_obstacle_count++;
+      }
     }
-    for(i = x1; i <= x2; i++){
-      //printf("%d %d %d %d", x1, y1, x2, y2);
-      //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
-      temp_obstacle[temp_obstacle_count][0] = i;
-      temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
-      temp_obstacle_count++;
+    else
+    {
+      if(y1 > y2){
+        temp = y1;
+        y1 = y2;
+        y2 = temp;
+        temp = x1;
+        x1 = x2;
+        x2 = temp;
+      }
+      for(i = y1; i <= y2; i++){
+        printf("%d %d %d %d %d\n", x1, y1, x2, y2, i);
+        temp_obstacle[temp_obstacle_count][0] = ((x2 - x1)*(1.0)/(y2 - y1))*(i - y1) + x1;
+        temp_obstacle[temp_obstacle_count][1] = i;
+        temp_obstacle_count++;
+      }
+      printf("\n");
     }
   }
 }
@@ -120,21 +139,30 @@ void findObstacles(){
     Magiging natural number na i-coconsider na sa coordinate system natin.
   */
   int i,j,k,l;
-  int x1, x2; // This will be values for the boundaries of x.
-  float y1, y2; // This will be values for the boundaries of y.
+  float x1, x2; // This will be values for the boundaries of x.
+  float y1, y2, y3, y4; // This will be values for the boundaries of y.
+  float temp;
   for(i=0; i < polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
     temp_obstacle_count = 0;
     for(j=0; j < verticesSize[i]; j++){
       if(j != verticesSize[i] - 1){
         // Trace current with next
-        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][j+1][0],vertices[i][j+1][1]);
+        x1 = vertices[i][j][0];
+        y1 = vertices[i][j][1];
+        x2 = vertices[i][j+1][0];
+        y2 = vertices[i][j+1][1];
       }
       else{
         // Trace current with first
-        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
+        x1 = vertices[i][j][0];
+        y1 = vertices[i][j][1];
+        x2 = vertices[i][0][0];
+        y2 = vertices[i][0][1];
       }
+      traceObstacle(x1, y1, x2, y2);
     }
+
     /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
     // Get range of x1 and x2 by finding least and highest value of x
     x1 = 999999;
@@ -174,12 +202,40 @@ void findObstacles(){
       }
     }
 
-    k = 0;
-    for(j=0; j<X_COOR_SIZE; j++){
-      for(l=0; l<Y_COOR_SIZE; l++){
-        if(obstacleCoordinates[j][l] == 1){
-          //printf("(%d,%d)\n", j, l);
-          k++;
+    y1 = 999999;
+    y2 = 0;
+    for(j=0; j<temp_obstacle_count;j++){
+      if(temp_obstacle[j][1] <= y1){
+        y1 = temp_obstacle[j][1];
+      }
+      if(temp_obstacle[j][1] >= y2){
+        y2 = temp_obstacle[j][1];
+      }
+    }
+    //printf("Lowest value is %.2lf, Highest value is %.2lf", y1, y2);
+    for(j=y1; j<=y2; j++){   // Start from x1 -> x2
+      // Find y1 (lowest) and y2 (highest) points paired with x1...
+      x1 = 999999;
+      x2 = 0;
+      for(k=0; k<temp_obstacle_count; k++){
+        if(temp_obstacle[k][1] == j){
+          // Consider y now
+          if(temp_obstacle[k][0] <= x1){
+            x1 = temp_obstacle[k][0];
+          }
+          if(temp_obstacle[k][0] >= x2){
+            x2 = temp_obstacle[k][0];
+          }
+        }
+      }
+      printf("For %d, lowest value is %f, highest value is %f.\n", j, x1, x2);
+      // Now that we know y, let's fill the obstacles
+      if(x1 != 999999 && x2 != 0){
+        if(ceil(x1)!= floor(x2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
+          obstacleCoordinates[(int)x2][j] = 1;
+        }
+        else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
+          obstacleCoordinates[(int)x1][j] = 1;
         }
       }
     }
