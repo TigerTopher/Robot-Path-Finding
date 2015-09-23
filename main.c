@@ -477,7 +477,7 @@ int isSuccessor_DFS(int x, int y){
     return 0;
   }
 
-  if(obstacleCoordinates[x][y] == 1 || obstacleCoordinates[x][y] == 2 || obstacleCoordinates[x][y] == 3  )  // Obstacle or Initial or Goal
+  if(obstacleCoordinates[x][y] == 1 || obstacleCoordinates[x][y] == 2)  // Obstacle or Initial or Goal
     return 0;
   else if((obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
     return 0;
@@ -508,6 +508,7 @@ int DFS(){
   // 1. If GOAL?(initial-state) then return initial-state
   if(initial[0] == goal[0] && initial[1] == goal[1])
     return 0;
+
   // 2. INSERT(initial-node,FRINGE)
   push(&stack_top,curr_x,curr_y);
 
@@ -546,39 +547,47 @@ int DFS(){
 
       //s = STATE(n)
       if(isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
-        if(curr_x == goal[0] && (curr_y - 1) == goal[1])
+        if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
+          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
           return 1;
+        }
         push(&stack_top,curr_x,curr_y - 1);
         printf("\nPushed: %d, %d\n", curr_x, curr_y-1);
         //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
       if(isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
-        if(curr_x == goal[0] && (curr_y + 1) == goal[1])
+        if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
+          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 5);
           return 1;
+        }
         push(&stack_top,curr_x,curr_y + 1);
         printf("\nPushed: %d, %d\n", curr_x, curr_y+1);
         //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
       if(isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
-        if((curr_x-1) == goal[0] && curr_y == goal[1])
+        if((curr_x-1) == goal[0] && curr_y == goal[1]){
+          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 6);
           return 1;
+        }
         push(&stack_top,curr_x-1,curr_y);
         printf("\nPushed: %d, %d\n", curr_x-1, curr_y);
         //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
       if(isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
-        if((curr_x+1) == goal[0] && curr_y == goal[1])
+        if((curr_x+1) == goal[0] && curr_y == goal[1]){
+          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 7);
           return 1;
+        }
         push(&stack_top,curr_x+1,curr_y);
         printf("\nPushed: %d, %d\n", curr_x+1, curr_y);
         //printf("Nag-right: %d\n", (4*num_runs) + 7);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    //getchar();
+    getchar();
   }
 }
 
