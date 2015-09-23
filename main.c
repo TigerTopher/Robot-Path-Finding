@@ -83,7 +83,7 @@ int checkFront(NODE_POINTER FRONT); // Output values are placed in global variab
 int checkRear(NODE_POINTER REAR); // Output values are placed in global variables variable1 and variable2.
 int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);
 
-void printGrid(){
+void printPath(){
   int i;
   int j;
 
@@ -102,7 +102,7 @@ void printGrid(){
         printf("^ ");
       }
       else if(obstacleCoordinates[i][j] == 1){
-        printf("* ");
+        printf("@ ");
       }
       else if(obstacleCoordinates[i][j] == 2){
         printf("I ");
@@ -116,6 +116,7 @@ void printGrid(){
     }
     printf("\n");
   }
+
 }
 
 void removeEnter(char* buffer){
@@ -439,12 +440,12 @@ int main(){
     if(flag == 0)
       printf("Initial is Goal State.\n");
     else if(flag == 1){
-      printf("Successful.\n");
+      printf("DFS Successful.\n");
     }
     else{
-      printf("Unsuccessful.\n");
+      printf("DFS Unsuccessful.\n");
     }
-    printGrid();
+    printPath();
   }
 }
 
@@ -502,7 +503,7 @@ int DFS(){
   int flag;
 
   num_runs++;
-  printf("\nNum Runs: %d\n", num_runs);
+  //printf("\nNum Runs: %d\n", num_runs);
   obstacleCoordinates[initial[0]][initial[1]] = 2;
   obstacleCoordinates[goal[0]][goal[1]] = 3;
   // 1. If GOAL?(initial-state) then return initial-state
@@ -518,22 +519,26 @@ int DFS(){
       return -1; // Failure.
     }
 
+    /* // Print optional...
     for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
     }
+    */
+
     //n = REMOVE(FRINGE)
     pop(&stack_top);
     curr_x = variable1;
     curr_y = variable2;
-    printf("\nPOPPED: %d, %d\n", curr_x, curr_y);
+    //printf("\nPOPPED: %d, %d\n", curr_x, curr_y);
 
     flag = (isVisited_DFS(curr_x, curr_y) != 1);
-    if(flag == 0){
+
+    /*if(flag == 0){
       printf("Is already explored.");
-    }
+    }*/
 
     checkTop(stack_top);
     //printf("%d, %d\n", variable1, variable2);
@@ -548,46 +553,46 @@ int DFS(){
       //s = STATE(n)
       if(isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
         if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
-          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
           return 1;
         }
         push(&stack_top,curr_x,curr_y - 1);
-        printf("\nPushed: %d, %d\n", curr_x, curr_y-1);
+        //printf("\nPushed: %d, %d\n", curr_x, curr_y-1);
         //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
       if(isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
         if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
-          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 5);
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 5);
           return 1;
         }
         push(&stack_top,curr_x,curr_y + 1);
-        printf("\nPushed: %d, %d\n", curr_x, curr_y+1);
+        //printf("\nPushed: %d, %d\n", curr_x, curr_y+1);
         //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
       if(isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
         if((curr_x-1) == goal[0] && curr_y == goal[1]){
-          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 6);
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 6);
           return 1;
         }
         push(&stack_top,curr_x-1,curr_y);
-        printf("\nPushed: %d, %d\n", curr_x-1, curr_y);
+        //printf("\nPushed: %d, %d\n", curr_x-1, curr_y);
         //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
       if(isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
         if((curr_x+1) == goal[0] && curr_y == goal[1]){
-          //obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 7);
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 7);
           return 1;
         }
         push(&stack_top,curr_x+1,curr_y);
-        printf("\nPushed: %d, %d\n", curr_x+1, curr_y);
+        //printf("\nPushed: %d, %d\n", curr_x+1, curr_y);
         //printf("Nag-right: %d\n", (4*num_runs) + 7);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    getchar();
+    //getchar();
   }
 }
 
@@ -644,13 +649,15 @@ int pop(NODE_POINTER* TOP){
 
 int checkTop(NODE_POINTER TOP){
   if(TOP.node == NULL){
-    printf("\nTOP points to NULL.");
+    //printf("\nTOP points to NULL.");
+    variable1 = -1;
+    variable2 = -1;
     return 0;
   }
 
   variable1 = TOP.node->x;
   variable2 = TOP.node->y;
-  printf("\nTOP points to (%d, %d)", TOP.node->x, TOP.node->y);
+  //printf("\nTOP points to (%d, %d)", TOP.node->x, TOP.node->y);
   return 1;
 }
 
