@@ -3,6 +3,7 @@
 #include<time.h>
 #include<string.h>
 #include<math.h>
+#include <termcap.h>
 
 /* John Louise Tan
   Christopher Vizcarra*/
@@ -10,8 +11,8 @@
 /*=============== Macro Definition ===============*/
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
-#define X_COOR_SIZE 400
-#define Y_COOR_SIZE 200
+#define X_COOR_SIZE 30
+#define Y_COOR_SIZE 30
 
 /*=============== Typedefs and Structs =============== */
 /* Same lang naman ang representation ng Stack at Queue, which
@@ -39,8 +40,11 @@ int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an
 float temp_obstacle[ARRAYSPACE_BIG][2];
 int temp_obstacle_count = 0;
 
+int num_runs = -1;
+
 NODE_POINTER front;
 NODE_POINTER rear;
+NODE_POINTER stack_top;
 
 int variable1;
 int variable2;
@@ -48,6 +52,16 @@ int variable2;
 /*=============== Function Prototyping =============== */
 // Data Structure Functions are located below main function :)
 LIST_NODE* newNode(int x1, int y1);
+
+void clear_screen()
+{
+  char buf[1024];
+  char *str;
+
+  tgetent(buf, getenv("TERM"));
+  str = tgetstr("cl", NULL);
+  fputs(str, stdout);
+}
 
 // For Stack:
 void push(NODE_POINTER* TOP, int x1, int y1);
@@ -57,6 +71,7 @@ void push(NODE_POINTER* TOP, int x1, int y1);
 int pop(NODE_POINTER* TOP);  // Output values are placed in global variables variable1 and variable2.
 int checkTop(NODE_POINTER TOP); // Output values are placed in global variables variable1 and variable2.
 int isEmptyStack(NODE_POINTER* TOP);
+
 
 // This is temporary variable that can handle floats in building the obstacle.
 // I would put x-y pairs here
@@ -128,47 +143,26 @@ int traceObstacle(int x1, int y1, int x2, int y2){
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
       // obstacleCoordinates[x1][i] = 1;
-      printf("Marking: %d %d\n", x1, i);
+      //printf("Marking: %d %d\n", x1, i);
       obstacleCoordinates[x1][i] = 1;
     }
   }
   else{
     // CASE 2: Slope is nonzero
-    if(((float)(y2 - y1)/(float)(x2 - x1)) <= 1 && ((float)(y2 - y1)/(float)(x2 - x1)) >= -1)
-    {
-      if(x1 > x2){
-        temp = x1;
-        x1 = x2;
-        x2 = temp;
-        temp = y1;
-        y1 = y2;
-        y2 = temp;
-      }
-      for(i = x1; i <= x2; i++){
-        //printf("%d %d %d %d", x1, y1, x2, y2);
-        //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
-        temp_obstacle[temp_obstacle_count][0] = i;
-        temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
-        temp_obstacle_count++;
-      }
+    if(x1 > x2){
+      temp = x1;
+      x1 = x2;
+      x2 = temp;
+      temp = y1;
+      y1 = y2;
+      y2 = temp;
     }
-    else
-    {
-      if(y1 > y2){
-        temp = y1;
-        y1 = y2;
-        y2 = temp;
-        temp = x1;
-        x1 = x2;
-        x2 = temp;
-      }
-      for(i = y1; i <= y2; i++){
-        printf("%d %d %d %d %d\n", x1, y1, x2, y2, i);
-        temp_obstacle[temp_obstacle_count][0] = ((x2 - x1)*(1.0)/(y2 - y1))*(i - y1) + x1;
-        temp_obstacle[temp_obstacle_count][1] = i;
-        temp_obstacle_count++;
-      }
-      printf("\n");
+    for(i = x1; i <= x2; i++){
+      //printf("%d %d %d %d", x1, y1, x2, y2);
+      //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
+      temp_obstacle[temp_obstacle_count][0] = i;
+      temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
+      temp_obstacle_count++;
     }
   }
 }
@@ -183,30 +177,21 @@ void findObstacles(){
     Magiging natural number na i-coconsider na sa coordinate system natin.
   */
   int i,j,k,l;
-  float x1, x2; // This will be values for the boundaries of x.
-  float y1, y2, y3, y4; // This will be values for the boundaries of y.
-  float temp;
+  int x1, x2; // This will be values for the boundaries of x.
+  float y1, y2; // This will be values for the boundaries of y.
   for(i=0; i < polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
     temp_obstacle_count = 0;
     for(j=0; j < verticesSize[i]; j++){
       if(j != verticesSize[i] - 1){
         // Trace current with next
-        x1 = vertices[i][j][0];
-        y1 = vertices[i][j][1];
-        x2 = vertices[i][j+1][0];
-        y2 = vertices[i][j+1][1];
+        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][j+1][0],vertices[i][j+1][1]);
       }
       else{
         // Trace current with first
-        x1 = vertices[i][j][0];
-        y1 = vertices[i][j][1];
-        x2 = vertices[i][0][0];
-        y2 = vertices[i][0][1];
+        traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
       }
-      traceObstacle(x1, y1, x2, y2);
     }
-
     /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
     // Get range of x1 and x2 by finding least and highest value of x
     x1 = 999999;
@@ -246,41 +231,12 @@ void findObstacles(){
       }
     }
 
-    y1 = 999999;
-    y2 = 0;
-    for(j=0; j<temp_obstacle_count;j++){
-      if(temp_obstacle[j][1] <= y1){
-        y1 = temp_obstacle[j][1];
-      }
-      if(temp_obstacle[j][1] >= y2){
-        y2 = temp_obstacle[j][1];
-      }
-    }
-    //printf("Lowest value is %.2lf, Highest value is %.2lf", y1, y2);
-    for(j=y1; j<=y2; j++){   // Start from x1 -> x2
-      // Find y1 (lowest) and y2 (highest) points paired with x1...
-      x1 = 999999;
-      x2 = 0;
-      for(k=0; k<temp_obstacle_count; k++){
-        if(temp_obstacle[k][1] == j){
-          // Consider y now
-          if(temp_obstacle[k][0] <= x1){
-            x1 = temp_obstacle[k][0];
-          }
-          if(temp_obstacle[k][0] >= x2){
-            x2 = temp_obstacle[k][0];
-          }
-        }
-      }
-      printf("For %d, lowest value is %f, highest value is %f.\n", j, x1, x2);
-      // Now that we know y, let's fill the obstacles
-      if(x1 != 999999 && x2 != 0){
-        if(x1 != x2){ //Round up y1 == Round down y2, only (j,y1) is tagged.
-          obstacleCoordinates[(int)ceil(x1)][j] = 1;
-          obstacleCoordinates[(int)floor(x2)][j] = 1;
-        }
-        else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
-          obstacleCoordinates[(int)x1][j] = 1;
+    k = 0;
+    for(j=0; j<X_COOR_SIZE; j++){
+      for(l=0; l<Y_COOR_SIZE; l++){
+        if(obstacleCoordinates[j][l] == 1){
+          //printf("(%d,%d)\n", j, l);
+          k++;
         }
       }
     }
@@ -289,8 +245,11 @@ void findObstacles(){
   }
 }
 
+/* =============== Depth-First Search =============== */
+
+
 /* =============== TESTING FUNCTION =============== */
-void test(){
+void test1(){
   int choice_Q = 1;
   int input1, input2;
 
@@ -361,21 +320,6 @@ void test(){
       }
     }
   }
-
-  /* // Para kay Stack Test
-  pop(&S1_TOP);
-  checkTop(S1_TOP); // Top points to NULL...
-  push(&S1_TOP, 1, 2);
-  checkTop(S1_TOP); // Top now points to 1,2
-  push(&S1_TOP, 6, 7);
-  checkTop(S1_TOP); // Top now points to 6,7
-  pop(&S1_TOP);
-  checkTop(S1_TOP); // Top now points to 6,7
-  pop(&S1_TOP);
-  pop(&S1_TOP);
-  push(&S1_TOP, 5,6);
-  */
-
 }
 
 /* =============== MAIN WORKING FUNCTION =============== */
@@ -396,7 +340,7 @@ int main(){
   front.node = NULL;
   rear.node = NULL;
 
-  test();
+  //test1();  // Call this to Test for Queue and Stack...
 
   /* File Parsing, Initialization, Input Validation*/
   fp = fopen("input.txt", "r");
@@ -411,7 +355,7 @@ int main(){
         initial[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         initial[1] = atoi(token);
-        if((initial[0] <= 0) || (initial[1] <= 0) || (initial[0] > X_COOR_SIZE) || (initial[1] > Y_COOR_SIZE)){
+        if((initial[0] < 0) || (initial[1] < 0) || (initial[0] > X_COOR_SIZE) || (initial[1] > Y_COOR_SIZE)){
           printf("Invalid initial state. Not in range.\n");
           flag = 1;
         }
@@ -422,7 +366,7 @@ int main(){
         goal[0] = atoi(token);
         token = strtok(NULL, strtokBuffer);
         goal[1] = atoi(token);
-        if((goal[0] <= 0) || (goal[1] <= 0) || (goal[0] > X_COOR_SIZE) || (goal[1] > Y_COOR_SIZE)){
+        if((goal[0] < 0) || (goal[1] < 0) || (goal[0] > X_COOR_SIZE) || (goal[1] > Y_COOR_SIZE)){
           printf("Invalid goal state. Not in range.\n");
           flag = 1;
         }
@@ -450,25 +394,34 @@ int main(){
       }
     }
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
-    fclose(fp);
     findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
 
     if(flag == 1){
       printf("Please fix input file.\n");
     }
 
-    fp = fopen("output1.txt", "w");
-    for(j = Y_COOR_SIZE - 1; j >= 0; j--){
-      for(i = 0; i < X_COOR_SIZE; i++){
-        fprintf(fp, "%d ", obstacleCoordinates[i][j]);
-        if(obstacleCoordinates[i][j] == 1)
-        {
-          printf("(%d, %d)", i, j);
-        }
-      }
-      fprintf(fp, "\n");
+    flag = DFS();
+
+    if(flag == 0)
+      printf("Initial is Goal State.\n");
+    else if(flag == 1){
+      printf("Successful.\n");
     }
-    fclose(fp);
+    else{
+      printf("Unsuccessful.\n");
+    }
+
+    printf("NEW PARE\n\n\n");
+    flag = DFS();
+
+    if(flag == 0)
+      printf("Initial is Goal State.\n");
+    else if(flag == 1){
+      printf("Successful.\n");
+    }
+    else{
+      printf("Unsuccessful.\n");
+    }
 
   }
 }
@@ -486,6 +439,112 @@ int main(){
     iii. INSERT(n', FRINGE)
 
 */
+
+int isSuccessor_DFS(int x, int y){
+  // It is a successor if it is an unexplored node.
+  // Still inbounds
+  if(!(x >= 0 && x < X_COOR_SIZE)){
+    return 0;
+  }
+  else if(!(y >= 0 && y < Y_COOR_SIZE)){
+    return 0;
+  }
+
+  if(obstacleCoordinates[x][y] == 1)  // Obstacle
+    return 0;
+  else if((obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
+    return 0;
+
+  return 1;
+}
+
+int DFS(){
+  /*
+    Global Variables Used:
+    int num_runs = 0;
+    int initial[2];
+    int goal[2];
+    int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];
+  */
+  // stack_top is our fringe.
+  int curr_x = initial[0];
+  int curr_y = initial[1];
+  int temp_x;
+  int temp_y;
+  int i;
+  int j;
+  num_runs++;
+  printf("\nNum Runs: %d\n", num_runs);
+  obstacleCoordinates[initial[0]][initial[1]] = 2;
+  obstacleCoordinates[goal[0]][goal[1]] = 3;
+  // 1. If GOAL?(initial-state) then return initial-state
+  if(initial[0] == goal[0] && initial[1] == goal[1])
+    return 0;
+  // 2. INSERT(initial-node,FRINGE)
+  push(&stack_top,curr_x,curr_y);
+
+  while(1)
+  {
+    if(isEmptyStack(&stack_top) == 1){
+      return -1; // Failure.
+    }
+
+    for(i = 0; i<X_COOR_SIZE; i++){
+      for(j=0; j<Y_COOR_SIZE;j++){
+        printf("%d ", obstacleCoordinates[i][j]);
+      }
+      printf("\n");
+    }
+    //n = REMOVE(FRINGE)
+    pop(&stack_top);
+    curr_x = variable1;
+    curr_y = variable2;
+    obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
+
+    //s = STATE(n)
+    if(isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Nag-Up
+      if(curr_x == goal[0] && (curr_y - 1) == goal[1])
+        return 1;
+      push(&stack_top,curr_x,curr_y - 1);
+      //printf("Nag-up: %d\n", (4*num_runs) + 4);
+      obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+    }
+    if(isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Nag-Down
+      if(curr_x == goal[0] && (curr_y + 1) == goal[1])
+        return 1;
+      push(&stack_top,curr_x,curr_y + 1);
+      //printf("Nag-down: %d\n", (4*num_runs) + 5);
+      obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
+    }
+    if(isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Nag-Left
+      if((curr_x-1) == goal[0] && curr_y == goal[1])
+        return 1;
+      push(&stack_top,curr_x-1,curr_y);
+      //printf("Nag-left: %d\n", (4*num_runs) + 6);
+      obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
+    }
+    if(isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Right
+      if((curr_x+1) == goal[0] && curr_y == goal[1])
+        return 1;
+      push(&stack_top,curr_x+1,curr_y);
+      //printf("Nag-right: %d\n", (4*num_runs) + 7);
+      obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+    }
+    getchar();
+  }
+}
+
+
+//
+void cleanUpArray(){
+  int i,j;
+  for(i = 0; i < X_COOR_SIZE; i++){
+    for(j = 0; j < Y_COOR_SIZE; j++){
+      if(obstacleCoordinates[i][j] != 1)
+        obstacleCoordinates[i][j] = 0;
+    }
+  }
+}
 
 
 // Data Structure Operators
@@ -533,7 +592,7 @@ int pop(NODE_POINTER* TOP){
 
     free(temp.node);                    // Free the popped node.
 
-    printf("\nPOPS(%d,%d)", variable1, variable2);
+    //printf("\nPOPS(%d,%d)", variable1, variable2);
 
     return 1;
   }

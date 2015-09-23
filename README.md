@@ -114,3 +114,18 @@ Stack Functions:
   * Returns 1 if Empty, 0 if otherwise.
   * Sample function call:
   `isEmptyStack(&S1_TOP)`
+
+### Convention for Fringe:
+Depth-First Search
+---
+Reason: Eliminate unnecessary clean up.
+Initially, num_runs is 0. +1 after finishing dfs, bfs, a* operation.
+
+0 or any numbers not in this list -> Unexplored Node
+1 -> Obstacle
+2 -> Initial state
+3 -> Goal State
+(4*num_runs) + 4 -> From down
+(4*num_runs) + 5 -> From Up
+(4*num_runs) + 6 -> From Right
+(4*num_runs) + 7 -> From Left
