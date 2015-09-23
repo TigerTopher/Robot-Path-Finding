@@ -3,7 +3,7 @@
 #include<time.h>
 #include<string.h>
 #include<math.h>
-#include <termcap.h>
+//#include <termcap.h>  // To use this, you need to compile by gcc main.c -lncurses -lm -o main.exe
 
 /* John Louise Tan
   Christopher Vizcarra*/
@@ -53,6 +53,7 @@ int variable2;
 // Data Structure Functions are located below main function :)
 LIST_NODE* newNode(int x1, int y1);
 
+/* // See line 6 for this
 void clear_screen()
 {
   char buf[1024];
@@ -61,7 +62,7 @@ void clear_screen()
   tgetent(buf, getenv("TERM"));
   str = tgetstr("cl", NULL);
   fputs(str, stdout);
-}
+}*/
 
 // For Stack:
 void push(NODE_POINTER* TOP, int x1, int y1);
@@ -86,7 +87,7 @@ int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);
 void printPath(){
   int i;
   int j;
-
+  //clear_screen();
   for(i = 0; i < X_COOR_SIZE; i++){
     for(j = 0; j < Y_COOR_SIZE; j++){
       if(obstacleCoordinates[i][j] == (4*num_runs)+4){
@@ -116,6 +117,7 @@ void printPath(){
     }
     printf("\n");
   }
+
 
 }
 
@@ -462,12 +464,15 @@ int main(){
     iii. INSERT(n', FRINGE)
 
 */
+
+// This just tells us if we have already visited that vertex before.
 int isVisited_DFS(int x, int y){
   if(obstacleCoordinates[x][y] == 2 ||(obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
     return 1;
   return 0;
 }
 
+// We check if a node is indeed a successor.
 int isSuccessor_DFS(int x, int y){
   // It is a successor if it is an unexplored node.
   // Still inbounds
@@ -486,14 +491,8 @@ int isSuccessor_DFS(int x, int y){
 }
 
 int DFS(){
-  /*
-    Global Variables Used:
-    int num_runs = 0;
-    int initial[2];
-    int goal[2];
-    int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];
-  */
   // stack_top is our fringe.
+
   int curr_x = initial[0];
   int curr_y = initial[1];
   int temp_x;
@@ -502,10 +501,13 @@ int DFS(){
   int j;
   int flag;
 
-  num_runs++;
   //printf("\nNum Runs: %d\n", num_runs);
+  num_runs++;
+
+  // Set initial and goal to a certain value
   obstacleCoordinates[initial[0]][initial[1]] = 2;
   obstacleCoordinates[goal[0]][goal[1]] = 3;
+
   // 1. If GOAL?(initial-state) then return initial-state
   if(initial[0] == goal[0] && initial[1] == goal[1])
     return 0;
