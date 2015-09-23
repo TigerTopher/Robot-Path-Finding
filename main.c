@@ -439,6 +439,11 @@ int main(){
     iii. INSERT(n', FRINGE)
 
 */
+int isVisited_DFS(int x, int y){
+  if(obstacleCoordinates[x][y] == 2 ||(obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
+    return 1;
+  return 0;
+}
 
 int isSuccessor_DFS(int x, int y){
   // It is a successor if it is an unexplored node.
@@ -450,11 +455,10 @@ int isSuccessor_DFS(int x, int y){
     return 0;
   }
 
-  if(obstacleCoordinates[x][y] == 1)  // Obstacle
+  if(obstacleCoordinates[x][y] == 1 || obstacleCoordinates[x][y] == 2 || obstacleCoordinates[x][y] == 3  )  // Obstacle or Initial or Goal
     return 0;
   else if((obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
     return 0;
-
   return 1;
 }
 
@@ -473,6 +477,8 @@ int DFS(){
   int temp_y;
   int i;
   int j;
+  int flag;
+
   num_runs++;
   printf("\nNum Runs: %d\n", num_runs);
   obstacleCoordinates[initial[0]][initial[1]] = 2;
@@ -499,53 +505,60 @@ int DFS(){
     pop(&stack_top);
     curr_x = variable1;
     curr_y = variable2;
-    obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
+    printf("\nPOPPED: %d, %d\n", curr_x, curr_y);
 
-    //s = STATE(n)
-    if(isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Nag-Up
-      if(curr_x == goal[0] && (curr_y - 1) == goal[1])
-        return 1;
-      push(&stack_top,curr_x,curr_y - 1);
-      //printf("Nag-up: %d\n", (4*num_runs) + 4);
-      obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+    flag = (isVisited_DFS(curr_x, curr_y) != 1);
+    if(flag == 0){
+      printf("Is already explored.");
     }
-    if(isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Nag-Down
-      if(curr_x == goal[0] && (curr_y + 1) == goal[1])
-        return 1;
-      push(&stack_top,curr_x,curr_y + 1);
-      //printf("Nag-down: %d\n", (4*num_runs) + 5);
-      obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
-    }
-    if(isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Nag-Left
-      if((curr_x-1) == goal[0] && curr_y == goal[1])
-        return 1;
-      push(&stack_top,curr_x-1,curr_y);
-      //printf("Nag-left: %d\n", (4*num_runs) + 6);
-      obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
-    }
-    if(isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Right
-      if((curr_x+1) == goal[0] && curr_y == goal[1])
-        return 1;
-      push(&stack_top,curr_x+1,curr_y);
-      //printf("Nag-right: %d\n", (4*num_runs) + 7);
-      obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+
+    checkTop(stack_top);
+    //printf("%d, %d\n", variable1, variable2);
+
+
+
+    if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
+    {
+      if(obstacleCoordinates[curr_x][curr_y] != 2)
+        obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
+
+      //s = STATE(n)
+      if(isVisited_DFS(curr_x, curr_y) == 1 && isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Nag-Up
+        if(curr_x == goal[0] && (curr_y - 1) == goal[1])
+          return 1;
+        push(&stack_top,curr_x,curr_y - 1);
+        printf("\nPushed: %d, %d\n", curr_x, curr_y-1);
+        //printf("Nag-up: %d\n", (4*num_runs) + 4);
+        obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+      }
+      if(isVisited_DFS(curr_x, curr_y) == 1 && isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Nag-Down
+        if(curr_x == goal[0] && (curr_y + 1) == goal[1])
+          return 1;
+        push(&stack_top,curr_x,curr_y + 1);
+        printf("\nPushed: %d, %d\n", curr_x, curr_y+1);
+        //printf("Nag-down: %d\n", (4*num_runs) + 5);
+        obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
+      }
+      if(isVisited_DFS(curr_x, curr_y) == 1 && isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Nag-Left
+        if((curr_x-1) == goal[0] && curr_y == goal[1])
+          return 1;
+        push(&stack_top,curr_x-1,curr_y);
+        printf("\nPushed: %d, %d\n", curr_x-1, curr_y);
+        //printf("Nag-left: %d\n", (4*num_runs) + 6);
+        obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
+      }
+      if(isVisited_DFS(curr_x, curr_y) == 1 && isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Right
+        if((curr_x+1) == goal[0] && curr_y == goal[1])
+          return 1;
+        push(&stack_top,curr_x+1,curr_y);
+        printf("\nPushed: %d, %d\n", curr_x+1, curr_y);
+        //printf("Nag-right: %d\n", (4*num_runs) + 7);
+        obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+      }
     }
     getchar();
   }
 }
-
-
-//
-void cleanUpArray(){
-  int i,j;
-  for(i = 0; i < X_COOR_SIZE; i++){
-    for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] != 1)
-        obstacleCoordinates[i][j] = 0;
-    }
-  }
-}
-
 
 // Data Structure Operators
 LIST_NODE* newNode(int x1, int y1){
