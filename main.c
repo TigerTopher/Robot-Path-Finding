@@ -562,13 +562,15 @@ int BFS(){
     }
 
      // Print optional...
-     printf("PUTA\n");
+    /*
+    printf("PUTA\n");
     for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
     }
+    */
 
     //n = REMOVE(FRINGE)
     if(dequeue(&front, &rear) != 0){
@@ -576,14 +578,16 @@ int BFS(){
       curr_y = variable2;
 
     }
-    printf("\nDEQUEUE: %d, %d\n", curr_x, curr_y);
-    printf("\n");
+    // printf("\nDEQUEUE: %d, %d\n", curr_x, curr_y);
+    // printf("\n");
 
     flag = (isVisited_BFS(curr_x, curr_y) != 1);
 
+    /*
     if(flag == 0){
       printf("Is already explored.");
     }
+    */
 
     //checkFront(front);
     //checkRear(rear);
@@ -592,7 +596,7 @@ int BFS(){
 
     if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
     {
-      printf("Pasok dito.");
+      //printf("Pasok dito.");
 
       if(obstacleCoordinates[curr_x][curr_y] != 2)
         obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
@@ -605,7 +609,7 @@ int BFS(){
         }
         enqueue(&front, &rear, curr_x,curr_y - 1);
         //printf("Enqueue %d, %d", curr_x,curr_y - 1);
-        printf("\nEnqueue: %d, %d\n", curr_x, curr_y-1);
+        //printf("\nEnqueue: %d, %d\n", curr_x, curr_y-1);
         //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
@@ -615,7 +619,7 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear, curr_x,curr_y + 1);
-        printf("\nEnqueue: %d, %d\n", curr_x, curr_y+1);
+        //printf("\nEnqueue: %d, %d\n", curr_x, curr_y+1);
         //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
@@ -625,7 +629,7 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear, curr_x-1,curr_y);
-        printf("\nEnqueue: %d, %d\n", curr_x-1, curr_y);
+        //printf("\nEnqueue: %d, %d\n", curr_x-1, curr_y);
         //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
@@ -635,12 +639,12 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear,curr_x+1,curr_y);
-        printf("\nEnqueue: %d, %d\n", curr_x+1, curr_y);
+        //printf("\nEnqueue: %d, %d\n", curr_x+1, curr_y);
         //printf("Nag-right: %d\n", (4*num_runs) + 7);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
-      checkFront(front);
-      checkRear(rear);
+      //checkFront(front);
+      //checkRear(rear);
     }
     //getchar();
   }
@@ -873,7 +877,7 @@ int dequeue(NODE_POINTER* FRONT, NODE_POINTER* REAR){
       (current.node)->next = NULL;
     }
 
-    printf("\nDEQUEUES: (%d,%d)", variable1, variable2);
+    //printf("\nDEQUEUES: (%d,%d)", variable1, variable2);
     return 1;
   }
 }
