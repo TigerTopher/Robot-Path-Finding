@@ -53,17 +53,6 @@ int variable2;
 // Data Structure Functions are located below main function :)
 LIST_NODE* newNode(int x1, int y1);
 
-/* // See line 6 for this
-void clear_screen()
-{
-  char buf[1024];
-  char *str;
-
-  tgetent(buf, getenv("TERM"));
-  str = tgetstr("cl", NULL);
-  fputs(str, stdout);
-}*/
-
 // For Stack:
 void push(NODE_POINTER* TOP, int x1, int y1);
 // POP and CHECKTOP returns 1 or 0.
@@ -84,11 +73,23 @@ int checkFront(NODE_POINTER FRONT); // Output values are placed in global variab
 int checkRear(NODE_POINTER REAR); // Output values are placed in global variables variable1 and variable2.
 int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);
 
+/* // See line 6 for this
+void clear_screen()
+{
+  char buf[1024];
+  char *str;
+
+  tgetent(buf, getenv("TERM"));
+  str = tgetstr("cl", NULL);
+  fputs(str, stdout);
+}*/
+
 void printPath(){
   int i;
   int j;
   //clear_screen();
   for(i = 0; i < X_COOR_SIZE; i++){
+    printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
       if(obstacleCoordinates[i][j] == (4*num_runs)+4){
         printf("> ");
@@ -282,9 +283,6 @@ void findObstacles(){
   }
 }
 
-/* =============== Depth-First Search =============== */
-
-
 /* =============== TESTING FUNCTION =============== */
 void test1(){
   int choice_Q = 1;
@@ -432,10 +430,21 @@ int main(){
     }
     polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
     findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
-
     if(flag == 1){
       printf("Please fix input file.\n");
     }
+
+    flag = BFS();
+
+    if(flag == 0)
+      printf("Initial is Goal State.\n");
+    else if(flag == 1){
+      printf("BFS Successful.\n");
+    }
+    else{
+      printf("BFS Unsuccessful.\n");
+    }
+    printPath();
 
     flag = DFS();
 
@@ -448,6 +457,7 @@ int main(){
       printf("DFS Unsuccessful.\n");
     }
     printPath();
+
   }
 }
 
@@ -465,15 +475,23 @@ int main(){
 
 */
 
+/* =============== Depth-First Search =============== */
+
 // This just tells us if we have already visited that vertex before.
-int isVisited_DFS(int x, int y){
+int isVisited(int x, int y){
+  if(obstacleCoordinates[x][y] == 2 ||(obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
+    return 1;
+  return 0;
+}
+
+int isVisited_BFS(int x, int y){
   if(obstacleCoordinates[x][y] == 2 ||(obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
     return 1;
   return 0;
 }
 
 // We check if a node is indeed a successor.
-int isSuccessor_DFS(int x, int y){
+int isSuccessor(int x, int y){
   // It is a successor if it is an unexplored node.
   // Still inbounds
   if(!(x >= 0 && x < X_COOR_SIZE)){
@@ -489,6 +507,145 @@ int isSuccessor_DFS(int x, int y){
     return 0;
   return 1;
 }
+
+// We check if a node is indeed a successor.
+int isSuccessor_BFS(int x, int y){
+  // It is a successor if it is an unexplored node.
+  // Still inbounds
+  if(!(x >= 0 && x < X_COOR_SIZE)){
+    return 0;
+  }
+  else if(!(y >= 0 && y < Y_COOR_SIZE)){
+    return 0;
+  }
+
+  if(obstacleCoordinates[x][y] == 1 || obstacleCoordinates[x][y] == 2)  // Obstacle or Initial or Goal
+    return 0;
+  else if((obstacleCoordinates[x][y] == (4*num_runs)+4) || (obstacleCoordinates[x][y] == (4*num_runs)+5)  || (obstacleCoordinates[x][y] == (4*num_runs)+ 6) || (obstacleCoordinates[x][y] == (4*num_runs)+ 7 ))
+    return 0;
+  return 1;
+}
+
+
+// ===================== BFS ===================
+
+
+int BFS(){
+  // stack_top is our fringe.
+
+  int curr_x = initial[0];
+  int curr_y = initial[1];
+  int temp_x;
+  int temp_y;
+  int i;
+  int j;
+  int flag;
+
+  //printf("\nNum Runs: %d\n", num_runs);
+  num_runs++;
+
+  // Set initial and goal to a certain value
+  obstacleCoordinates[initial[0]][initial[1]] = 2;
+  obstacleCoordinates[goal[0]][goal[1]] = 3;
+
+  // 1. If GOAL?(initial-state) then return initial-state
+  if(initial[0] == goal[0] && initial[1] == goal[1])
+    return 0;
+
+  // 2. INSERT(initial-node,FRINGE)
+  enqueue(&front, &rear, curr_x, curr_y);  // Enqueue initial point
+
+  while(1)
+  {
+    if(isEmptyQueue(&front, &rear) == 1){
+      return -1; // Failure.
+    }
+
+     // Print optional...
+     printf("PUTA\n");
+    for(i = 0; i<X_COOR_SIZE; i++){
+      for(j=0; j<Y_COOR_SIZE;j++){
+        printf("%d ", obstacleCoordinates[i][j]);
+      }
+      printf("\n");
+    }
+
+    //n = REMOVE(FRINGE)
+    if(dequeue(&front, &rear) != 0){
+      curr_x = variable1;
+      curr_y = variable2;
+
+    }
+    printf("\nDEQUEUE: %d, %d\n", curr_x, curr_y);
+    printf("\n");
+
+    flag = (isVisited_BFS(curr_x, curr_y) != 1);
+
+    if(flag == 0){
+      printf("Is already explored.");
+    }
+
+    //checkFront(front);
+    //checkRear(rear);
+
+    //printf("%d, %d\n", variable1, variable2);
+
+    if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
+    {
+      printf("Pasok dito.");
+
+      if(obstacleCoordinates[curr_x][curr_y] != 2)
+        obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
+
+      //s = STATE(n)
+      if(isSuccessor_BFS(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
+        if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
+          return 1;
+        }
+        enqueue(&front, &rear, curr_x,curr_y - 1);
+        //printf("Enqueue %d, %d", curr_x,curr_y - 1);
+        printf("\nEnqueue: %d, %d\n", curr_x, curr_y-1);
+        //printf("Nag-up: %d\n", (4*num_runs) + 4);
+        obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+      }
+      if(isSuccessor_BFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
+        if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 5);
+          return 1;
+        }
+        enqueue(&front, &rear, curr_x,curr_y + 1);
+        printf("\nEnqueue: %d, %d\n", curr_x, curr_y+1);
+        //printf("Nag-down: %d\n", (4*num_runs) + 5);
+        obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
+      }
+      if(isSuccessor_BFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
+        if((curr_x-1) == goal[0] && curr_y == goal[1]){
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 6);
+          return 1;
+        }
+        enqueue(&front, &rear, curr_x-1,curr_y);
+        printf("\nEnqueue: %d, %d\n", curr_x-1, curr_y);
+        //printf("Nag-left: %d\n", (4*num_runs) + 6);
+        obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
+      }
+      if(isSuccessor_BFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
+        if((curr_x+1) == goal[0] && curr_y == goal[1]){
+          obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 7);
+          return 1;
+        }
+        enqueue(&front, &rear,curr_x+1,curr_y);
+        printf("\nEnqueue: %d, %d\n", curr_x+1, curr_y);
+        //printf("Nag-right: %d\n", (4*num_runs) + 7);
+        obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+      }
+      checkFront(front);
+      checkRear(rear);
+    }
+    //getchar();
+  }
+}
+
 
 int DFS(){
   // stack_top is our fringe.
@@ -536,15 +693,14 @@ int DFS(){
     curr_y = variable2;
     //printf("\nPOPPED: %d, %d\n", curr_x, curr_y);
 
-    flag = (isVisited_DFS(curr_x, curr_y) != 1);
+    flag = (isVisited(curr_x, curr_y) != 1);
 
     /*if(flag == 0){
       printf("Is already explored.");
     }*/
 
-    checkTop(stack_top);
+    //checkTop(stack_top);
     //printf("%d, %d\n", variable1, variable2);
-
 
 
     if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
@@ -553,7 +709,7 @@ int DFS(){
         obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
 
       //s = STATE(n)
-      if(isSuccessor_DFS(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
+      if(isSuccessor(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
         if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
           return 1;
@@ -563,7 +719,7 @@ int DFS(){
         //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
-      if(isSuccessor_DFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
+      if(isSuccessor(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
         if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 5);
           return 1;
@@ -573,7 +729,7 @@ int DFS(){
         //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
-      if(isSuccessor_DFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
+      if(isSuccessor(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
         if((curr_x-1) == goal[0] && curr_y == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 6);
           return 1;
@@ -583,7 +739,7 @@ int DFS(){
         //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
-      if(isSuccessor_DFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
+      if(isSuccessor(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
         if((curr_x+1) == goal[0] && curr_y == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 7);
           return 1;
@@ -693,6 +849,9 @@ int dequeue(NODE_POINTER* FRONT, NODE_POINTER* REAR){
     current.node = (*REAR).node;
 
     if(current.node == (*FRONT).node){
+      variable1 = current.node->x;
+      variable2 = current.node->y;
+
       free(current.node);
       (*REAR).node = NULL;
       (*FRONT).node = NULL;
