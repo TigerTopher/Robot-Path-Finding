@@ -40,7 +40,7 @@ int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an
 float temp_obstacle[ARRAYSPACE_BIG][2];
 int temp_obstacle_count = 0;
 
-int num_runs = -1;
+int num_runs = 0;
 
 NODE_POINTER front;
 NODE_POINTER rear;
@@ -87,20 +87,97 @@ void clear_screen()
 void printPath(){
   int i;
   int j;
+  int curr_x;
+  int curr_y;
+
+  for(i = 0; i < X_COOR_SIZE; i++){
+    printf("\t\t");
+    for(j = 0; j < Y_COOR_SIZE; j++){
+      printf("%d ", obstacleCoordinates[i][j]);
+    }
+    printf("\n");
+  }
+
   //clear_screen();
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] == (4*num_runs)+4){
+      if(obstacleCoordinates[i][j] == (4*num_runs)+4){ // This is mod 0
         printf("> ");
       }
-      else if(obstacleCoordinates[i][j] == (4*num_runs)+5 ){
+      else if(obstacleCoordinates[i][j] == (4*num_runs)+5 ){ // This is mod 1
         printf("< ");
       }
-      else if(obstacleCoordinates[i][j] == (4*num_runs)+6){
+      else if(obstacleCoordinates[i][j] == (4*num_runs)+6){ // Mod 2
         printf("v ");
       }
-      else if(obstacleCoordinates[i][j] == (4*num_runs)+7){
+      else if(obstacleCoordinates[i][j] ==  (4*num_runs)+7){ // Mod 3
+        printf("^ ");
+      }
+      else if(obstacleCoordinates[i][j] == 1){
+        printf("@ ");
+      }
+      else if(obstacleCoordinates[i][j] == 2){
+        printf("I ");
+      }
+      else if(obstacleCoordinates[i][j] == 3){
+        printf("G ");
+      }
+      else{
+        printf(". ");//, obstacleCoordinates[i][j]);
+      }
+    }
+    printf("\n");
+  }
+
+
+  // Finding the successful path...
+  // We need to trace back the path from GOAL to Initial;
+  printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
+  curr_x = goal[0];
+  curr_y = goal[1];
+
+  while(curr_x != initial[0] || curr_y != initial[1]){
+    if (obstacleCoordinates[curr_x][curr_y]%4 == 0)
+    {
+      obstacleCoordinates[curr_x][curr_y] = 4;
+      //curr_x = ;
+      curr_y = curr_y + 1;
+    }
+    else if (obstacleCoordinates[curr_x][curr_y]%4 == 1)
+    {
+      obstacleCoordinates[curr_x][curr_y] = 5;
+      //curr_x = ;
+      curr_y = curr_y - 1;
+    }
+    else if (obstacleCoordinates[curr_x][curr_y]%4 == 2)
+    {
+      obstacleCoordinates[curr_x][curr_y] = 6;
+      curr_x = curr_x + 1;
+      //curr_y = ;
+    }
+    else if (obstacleCoordinates[curr_x][curr_y]%4 == 3)
+    {
+      obstacleCoordinates[curr_x][curr_y] = 7;
+      curr_x = curr_x - 1;
+      //curr_y = ;
+    }
+  }
+
+  // Printing.
+  for(i = 0; i < X_COOR_SIZE; i++){
+    printf("\t\t");
+    for(j = 0; j < Y_COOR_SIZE; j++){
+      if(obstacleCoordinates[i][j] == 4){ // This is mod 0
+        printf("> ");
+      }
+      else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
+        printf("< ");
+      }
+      else if(obstacleCoordinates[i][j] == 6){ // Mod 2
+        printf("v ");
+      }
+      else if(obstacleCoordinates[i][j] ==  7){ // Mod 3
         printf("^ ");
       }
       else if(obstacleCoordinates[i][j] == 1){
@@ -682,14 +759,14 @@ int DFS(){
       return -1; // Failure.
     }
 
-    /* // Print optional...
+     // Print optional...
     for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
     }
-    */
+
 
     //n = REMOVE(FRINGE)
     pop(&stack_top);
@@ -754,7 +831,7 @@ int DFS(){
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    //getchar();
+    getchar();
   }
 }
 
@@ -798,7 +875,7 @@ int pop(NODE_POINTER* TOP){
     temp.node = (*TOP).node;
     // Let temporary node point to where the top node currently points at.
 
-    (*TOP).node = ((*TOP).node)->next;
+      (*TOP).node = ((*TOP).node)->next;
     // Let the top node point to the next one...
 
     free(temp.node);                    // Free the popped node.
