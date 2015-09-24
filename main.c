@@ -73,6 +73,10 @@ int checkFront(NODE_POINTER FRONT); // Output values are placed in global variab
 int checkRear(NODE_POINTER REAR); // Output values are placed in global variables variable1 and variable2.
 int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);
 
+int isSuccessor_AStar(int x, int y);
+
+int AStar();
+
 /* // See line 6 for this
 void clear_screen()
 {
@@ -526,6 +530,10 @@ int isSuccessor_BFS(int x, int y){
   return 1;
 }
 
+int isSuccessor_AStar(int x, int y){
+
+}
+
 
 // ===================== BFS ===================
 
@@ -756,6 +764,11 @@ int DFS(){
     }
     //getchar();
   }
+}
+
+
+int AStar(){
+
 }
 
 // Data Structure Operators
