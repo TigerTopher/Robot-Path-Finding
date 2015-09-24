@@ -91,14 +91,18 @@ void printPath(){
   int curr_y;
 
   for(i = 0; i < X_COOR_SIZE; i++){
-    printf("\t\t");
+    //printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
-      printf("%d ", obstacleCoordinates[i][j]);
+      //printf("%d ", obstacleCoordinates[i][j]);
+      if(obstacleCoordinates[i][j] == 4 || obstacleCoordinates[i][j] == 5 || obstacleCoordinates[i][j] == 6 || obstacleCoordinates[i][j] == 7){
+        obstacleCoordinates[i][j] = 0;
+      }
     }
-    printf("\n");
+    //printf("\n");
   }
 
   //clear_screen();
+  printf("Nodes expanded and all paths.\n");
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
@@ -133,7 +137,8 @@ void printPath(){
 
   // Finding the successful path...
   // We need to trace back the path from GOAL to Initial;
-  printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
+  printf("Path from Initial to Goal\n");
+  //printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
   curr_x = goal[0];
   curr_y = goal[1];
 
@@ -168,7 +173,10 @@ void printPath(){
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] == 4){ // This is mod 0
+      if(i == goal[0] && j == goal[1]){
+        printf("G ");
+      }
+      else if(obstacleCoordinates[i][j] == 4){ // This is mod 0
         printf("> ");
       }
       else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
@@ -185,9 +193,6 @@ void printPath(){
       }
       else if(obstacleCoordinates[i][j] == 2){
         printf("I ");
-      }
-      else if(obstacleCoordinates[i][j] == 3){
-        printf("G ");
       }
       else{
         printf(". ");//, obstacleCoordinates[i][j]);
@@ -760,12 +765,14 @@ int DFS(){
     }
 
      // Print optional...
+     /*
     for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
     }
+    */
 
 
     //n = REMOVE(FRINGE)
@@ -831,7 +838,7 @@ int DFS(){
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    getchar();
+    //getchar();
   }
 }
 
