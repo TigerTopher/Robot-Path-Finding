@@ -23,6 +23,8 @@ typedef struct LIST_noder{ // Generic List DS
   int x;  // Data x
   int y;  // Data y
   struct LIST_noder *next; // Next
+  float distance;
+  int path_cost;
 } LIST_NODE;
 
 typedef struct{ // This serves as a stack pointer or pointer sa queue.
@@ -45,9 +47,12 @@ int num_runs = 0;
 NODE_POINTER front;
 NODE_POINTER rear;
 NODE_POINTER stack_top;
+NODE_POINTER AStar_top;
 
 int variable1;
 int variable2;
+int variable3;
+int successors[4];
 
 /*=============== Function Prototyping =============== */
 // Data Structure Functions are located below main function :)
@@ -73,7 +78,9 @@ int checkFront(NODE_POINTER FRONT); // Output values are placed in global variab
 int checkRear(NODE_POINTER REAR); // Output values are placed in global variables variable1 and variable2.
 int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR);
 
-int isSuccessor_AStar(int x, int y);
+void insert_AStar(NODE_POINTER* TOP, int x1, int y1, int path_cost);
+
+void successor_AStar(int x, int y, int path_cost);
 
 int AStar();
 
@@ -94,7 +101,7 @@ void printPath(){
   int curr_x;
   int curr_y;
 
-  for(i = 0; i < X_COOR_SIZE; i++){
+  /*for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
       printf("%d ", obstacleCoordinates[i][j]);
@@ -132,12 +139,12 @@ void printPath(){
       }
     }
     printf("\n");
-  }
+  }*/
 
 
   // Finding the successful path...
   // We need to trace back the path from GOAL to Initial;
-  printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
+  //printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
   curr_x = goal[0];
   curr_y = goal[1];
 
@@ -145,53 +152,62 @@ void printPath(){
     if (obstacleCoordinates[curr_x][curr_y]%4 == 0)
     {
       obstacleCoordinates[curr_x][curr_y] = 4;
+      /*printf("%d, %d\n", curr_x, curr_y);
+      getchar();*/
       //curr_x = ;
       curr_y = curr_y + 1;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 1)
     {
       obstacleCoordinates[curr_x][curr_y] = 5;
+      /*printf("%d, %d\n", curr_x, curr_y);
+      getchar();*/
       //curr_x = ;
       curr_y = curr_y - 1;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 2)
     {
       obstacleCoordinates[curr_x][curr_y] = 6;
+      /*printf("%d, %d\n", curr_x, curr_y);
+      getchar();*/
       curr_x = curr_x + 1;
       //curr_y = ;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 3)
     {
       obstacleCoordinates[curr_x][curr_y] = 7;
+      /*printf("%d, %d\n", curr_x, curr_y);*/
       curr_x = curr_x - 1;
       //curr_y = ;
     }
+    //getchar();
   }
 
+  printf("%d %d", goal[0], goal[1]);
   // Printing.
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] == 4){ // This is mod 0
-        printf("> ");
+      if(obstacleCoordinates[i][j] == 2){
+        printf("I ");
       }
-      else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
+      else if(i == goal[0] && j == goal[1]){
+        printf("G ");
+      }
+      else if(obstacleCoordinates[i][j] == 4){ // This is mod 0
         printf("< ");
       }
+      else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
+        printf("> ");
+      }
       else if(obstacleCoordinates[i][j] == 6){ // Mod 2
-        printf("v ");
+        printf("^ ");
       }
       else if(obstacleCoordinates[i][j] ==  7){ // Mod 3
-        printf("^ ");
+        printf("v ");
       }
       else if(obstacleCoordinates[i][j] == 1){
         printf("@ ");
-      }
-      else if(obstacleCoordinates[i][j] == 2){
-        printf("I ");
-      }
-      else if(obstacleCoordinates[i][j] == 3){
-        printf("G ");
       }
       else{
         printf(". ");//, obstacleCoordinates[i][j]);
@@ -539,6 +555,16 @@ int main(){
     }
     printPath();
 
+    flag = AStar();
+
+    if(flag == 0){
+      printf("A* Unsuccessful\n");
+    }
+    else if(flag == 1){
+      printf("A* Successful\n");
+    }
+    printPath();
+
   }
 }
 
@@ -607,8 +633,27 @@ int isSuccessor_BFS(int x, int y){
   return 1;
 }
 
-int isSuccessor_AStar(int x, int y){
-
+void successor_AStar(int x, int y, int path_cost){
+  if(obstacleCoordinates[x][y - 1] != 1 && (y - 1) >= 0 && obstacleCoordinates[x][y - 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] != 2){
+    //printf("inserting: %d %d %d\n", x, y - 1, obstacleCoordinates[x][y-1]);
+    obstacleCoordinates[x][y - 1] = (-1)*((4 * num_runs) + 4);
+    insert_AStar(&AStar_top, x, y - 1, path_cost);
+  }
+  if(obstacleCoordinates[x][y + 1] != 1 && (y + 1) < 200 && obstacleCoordinates[x][y + 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] != 2){
+    //printf("inserting: %d %d %d\n", x, y + 1,  obstacleCoordinates[x][y + 1]);
+    obstacleCoordinates[x][y + 1] = (-1)*((4 * num_runs) + 5);
+    insert_AStar(&AStar_top, x, y + 1, path_cost);
+  }
+  if(obstacleCoordinates[x + 1][y] != 1 && (x + 1) < 400 && obstacleCoordinates[x + 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] != 2){
+    //printf("inserting: %d %d %d\n", x + 1, y,  obstacleCoordinates[x + 1][y]);
+    obstacleCoordinates[x + 1][y] = (-1)*((4 * num_runs) + 7);
+    insert_AStar(&AStar_top, x + 1, y, path_cost);
+  }
+  if(obstacleCoordinates[x - 1][y] != 1 && (x - 1) >= 0 && obstacleCoordinates[x - 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] != 2){
+    //printf("inserting: %d %d %d\n", x - 1, y,  obstacleCoordinates[x - 1][y]);
+    obstacleCoordinates[x - 1][y] = (-1)*((4 * num_runs) + 6);
+    insert_AStar(&AStar_top, x - 1, y, path_cost);
+  }
 }
 
 
@@ -768,12 +813,12 @@ int DFS(){
     }
 
      // Print optional...
-    for(i = 0; i<X_COOR_SIZE; i++){
+    /*for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
-    }
+    }*/
 
 
     //n = REMOVE(FRINGE)
@@ -839,13 +884,64 @@ int DFS(){
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    getchar();
+    //getchar();
   }
 }
 
 
 int AStar(){
+  int curr_x = initial[0];
+  int curr_y = initial[1];
+  int path_cost = 0;
 
+  num_runs++;
+
+  obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
+  insert_AStar(&AStar_top, curr_x, curr_y, path_cost);
+  /*printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 0, 10, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  pop(&AStar_top);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 0, 10, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 5, 0, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 4, 4, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 0, 5, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
+
+  insert_AStar(&AStar_top, 28, 28, path_cost);
+  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);*/
+
+  while(1){
+    if(isEmptyStack(&AStar_top) == 1){
+      return 0;
+    }
+
+    pop(&AStar_top);
+    curr_x = variable1;
+    curr_y = variable2;
+    path_cost = variable3;
+
+    obstacleCoordinates[curr_x][curr_y] = (-1) * obstacleCoordinates[curr_x][curr_y];
+    //printf("curr x:%d, curr y: %d, path cost: %d representation: %d\n", curr_x, curr_y, path_cost, obstacleCoordinates[curr_x][curr_y]);
+
+    if(curr_x == goal[0] && curr_y == goal[1]){
+      return 1;
+    }
+
+    successor_AStar(curr_x, curr_y, path_cost + 1);
+
+    //getchar();
+  }
 }
 
 // Data Structure Operators
@@ -884,6 +980,7 @@ int pop(NODE_POINTER* TOP){
   else{
     variable1 = ((*TOP).node)->x;
     variable2 = ((*TOP).node)->y;
+    variable3 = ((*TOP).node)->path_cost;
 
     temp.node = (*TOP).node;
     // Let temporary node point to where the top node currently points at.
@@ -1002,6 +1099,46 @@ int isEmptyQueue(NODE_POINTER* FRONT, NODE_POINTER* REAR){
     return 1;
   }
   return 0;
+}
+
+void insert_AStar(NODE_POINTER* TOP, int x1, int y1, int path_cost){
+  NODE_POINTER alpha;
+  NODE_POINTER beta;
+  float distance = sqrt(pow((goal[0]-x1), 2) + pow((goal[1]-y1), 2));
+  LIST_NODE* new = newNode(x1, y1);
+
+  new->path_cost = path_cost;
+  new->distance = distance;
+  //printf("x1: %d, y1: %d, distance: %.2lf\n", x1, y1, distance);
+  if(isEmptyStack(TOP) == 1){
+    (*TOP).node = new;
+    (*TOP).node->next = NULL;
+  }
+  else{
+    alpha.node = (*TOP).node;
+    beta.node = NULL;
+    while(alpha.node != NULL){
+      if((alpha.node->distance + alpha.node->path_cost) > (distance + path_cost)){
+        break;
+      }
+      beta.node = alpha.node;
+      alpha.node = alpha.node->next;
+    }
+    new->next = alpha.node;
+    if(beta.node == NULL){
+      (*TOP).node = new;
+    }
+    else{
+      beta.node->next = new;
+    }
+
+    /*alpha.node = (*TOP).node;
+    while(alpha.node != NULL){
+      printf("(%d, %d), ", alpha.node->x, alpha.node->y);
+      alpha.node = alpha.node->next;
+    }
+    printf("\n");*/
+  }
 }
 
 /*Programmed by: John Louise Tan and Christopher Vizcarra*/
