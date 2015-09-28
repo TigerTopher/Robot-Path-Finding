@@ -101,15 +101,19 @@ void printPath(){
   int curr_x;
   int curr_y;
 
-  /*for(i = 0; i < X_COOR_SIZE; i++){
-    printf("\t\t");
-    for(j = 0; j < Y_COOR_SIZE; j++){
-      printf("%d ", obstacleCoordinates[i][j]);
+  for(j = Y_COOR_SIZE - 1; j >= 0; j--){
+    //printf("\t\t");
+    for(i = 0; i < X_COOR_SIZE; i++){
+      if(obstacleCoordinates[i][j] == 4 || obstacleCoordinates[i][j] == 5 || obstacleCoordinates[i][j] == 6 || obstacleCoordinates[i][j] == 7){
+        obstacleCoordinates[i][j] = 0;
+      }
+      //printf("%d ", obstacleCoordinates[i][j]);
     }
-    printf("\n");
+    //printf("\n");
   }
 
   //clear_screen();
+  /*printf("Nodes expanded and all paths.\n");
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
@@ -144,6 +148,7 @@ void printPath(){
 
   // Finding the successful path...
   // We need to trace back the path from GOAL to Initial;
+  printf("Path from Initial to Goal\n");
   //printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
   curr_x = goal[0];
   curr_y = goal[1];
@@ -183,8 +188,41 @@ void printPath(){
     //getchar();
   }
 
-  printf("%d %d", goal[0], goal[1]);
+  //printf("%d %d", goal[0], goal[1]);
   // Printing.
+  for(j = Y_COOR_SIZE - 1; j >= 0; j--){
+    printf("\t\t");
+    for(i = 0; i < X_COOR_SIZE; i++){
+      if(obstacleCoordinates[i][j] == 2){
+        printf("I ");
+      }
+      else if(i == goal[0] && j == goal[1]){
+        printf("G ");
+      }
+      else if(obstacleCoordinates[i][j] == 4){ // This is mod 0
+        printf("v ");
+      }
+      else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
+        printf("^ ");
+      }
+      else if(obstacleCoordinates[i][j] == 6){ // Mod 2
+        printf("< ");
+      }
+      else if(obstacleCoordinates[i][j] ==  7){ // Mod 3
+        printf("> ");
+      }
+      else if(obstacleCoordinates[i][j] == 1){
+        printf("@ ");
+      }
+      else{
+        printf(". ");//, obstacleCoordinates[i][j]);
+      }
+    }
+    printf("\n");
+  }
+
+  /*printf("\n\n");
+
   for(i = 0; i < X_COOR_SIZE; i++){
     printf("\t\t");
     for(j = 0; j < Y_COOR_SIZE; j++){
@@ -214,8 +252,7 @@ void printPath(){
       }
     }
     printf("\n");
-  }
-
+  }*/
 
 }
 
@@ -358,8 +395,8 @@ void findObstacles(){
       //printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
       // Now that we know y, let's fill the obstacles
       if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
-        obstacleCoordinates[j][(int)ceil(y1)] = 1;
-        obstacleCoordinates[j][(int)floor(y2)] = 1;
+        for(k=ceil(y1); k<=floor(y2); k++)
+        obstacleCoordinates[j][k] = 1;
       }
       else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
         obstacleCoordinates[j][(int)y1] = 1;
@@ -813,12 +850,14 @@ int DFS(){
     }
 
      // Print optional...
-    /*for(i = 0; i<X_COOR_SIZE; i++){
+     /*
+    for(i = 0; i<X_COOR_SIZE; i++){
       for(j=0; j<Y_COOR_SIZE;j++){
         printf("%d ", obstacleCoordinates[i][j]);
       }
       printf("\n");
-    }*/
+    }
+    */
 
 
     //n = REMOVE(FRINGE)
