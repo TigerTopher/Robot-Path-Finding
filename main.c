@@ -3,7 +3,6 @@
 #include<time.h>
 #include<string.h>
 #include<math.h>
-//#include <termcap.h>  // To use this, you need to compile by gcc main.c -lncurses -lm -o main.exe
 
 /* John Louise Tan
   Christopher Vizcarra*/
@@ -11,15 +10,12 @@
 /*=============== Macro Definition ===============*/
 #define ARRAYSPACE_SMALL 100
 #define ARRAYSPACE_BIG 80000
-#define X_COOR_SIZE 30
-#define Y_COOR_SIZE 30
+#define X_COOR_SIZE 400
+#define Y_COOR_SIZE 200
 
 /*=============== Typedefs and Structs =============== */
-/* Same lang naman ang representation ng Stack at Queue, which
-  is a list. Nagkakatalo lang sa function. So hayaan mong pangalanan
-  ko ang generic data structure bilang LIST */
 
-typedef struct LIST_noder{ // Generic List DS
+typedef struct LIST_noder{ // Generic List Data Structure
   int x;  // Data x
   int y;  // Data y
   struct LIST_noder *next; // Next
@@ -27,15 +23,14 @@ typedef struct LIST_noder{ // Generic List DS
   int path_cost;
 } LIST_NODE;
 
-typedef struct{ // This serves as a stack pointer or pointer sa queue.
-  LIST_NODE *node;  // Pwedeng top, front, rear
-} NODE_POINTER;
+typedef struct{ // This serves as a stack pointer or queue pointer.
+  LIST_NODE *node;} NODE_POINTER;
 
 /*=============== Global Variables ===============*/
 int initial[2];
 int goal[2];
 int vertices[ARRAYSPACE_SMALL][ARRAYSPACE_SMALL][2];
-int polygonCount;                  // Number of obstacles/polygon    | I-2 count
+int polygonCount;                  // Number of obstacles per polygon    | I-2 count
 int verticesSize[ARRAYSPACE_SMALL]; // Number of vertices per  polygon | L count
 int obstacleCoordinates[X_COOR_SIZE][Y_COOR_SIZE];  // Value of 1 if there is an obstacle.
 
@@ -53,6 +48,8 @@ int variable1;
 int variable2;
 int variable3;
 int successors[4];
+
+FILE* output_file;
 
 /*=============== Function Prototyping =============== */
 // Data Structure Functions are located below main function :)
@@ -84,72 +81,24 @@ void successor_AStar(int x, int y, int path_cost);
 
 int AStar();
 
-/* // See line 6 for this
-void clear_screen()
-{
-  char buf[1024];
-  char *str;
-
-  tgetent(buf, getenv("TERM"));
-  str = tgetstr("cl", NULL);
-  fputs(str, stdout);
-}*/
-
 void printPath(){
   int i;
   int j;
   int curr_x;
   int curr_y;
+  FILE* file;
 
   for(j = Y_COOR_SIZE - 1; j >= 0; j--){
-    //printf("\t\t");
     for(i = 0; i < X_COOR_SIZE; i++){
       if(obstacleCoordinates[i][j] == 4 || obstacleCoordinates[i][j] == 5 || obstacleCoordinates[i][j] == 6 || obstacleCoordinates[i][j] == 7){
         obstacleCoordinates[i][j] = 0;
       }
-      //printf("%d ", obstacleCoordinates[i][j]);
     }
-    //printf("\n");
   }
-
-  //clear_screen();
-  /*printf("Nodes expanded and all paths.\n");
-  for(i = 0; i < X_COOR_SIZE; i++){
-    printf("\t\t");
-    for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] == (4*num_runs)+4){ // This is mod 0
-        printf("> ");
-      }
-      else if(obstacleCoordinates[i][j] == (4*num_runs)+5 ){ // This is mod 1
-        printf("< ");
-      }
-      else if(obstacleCoordinates[i][j] == (4*num_runs)+6){ // Mod 2
-        printf("v ");
-      }
-      else if(obstacleCoordinates[i][j] ==  (4*num_runs)+7){ // Mod 3
-        printf("^ ");
-      }
-      else if(obstacleCoordinates[i][j] == 1){
-        printf("@ ");
-      }
-      else if(obstacleCoordinates[i][j] == 2){
-        printf("I ");
-      }
-      else if(obstacleCoordinates[i][j] == 3){
-        printf("G ");
-      }
-      else{
-        printf(". ");//, obstacleCoordinates[i][j]);
-      }
-    }
-    printf("\n");
-  }*/
-
 
   // Finding the successful path...
   // We need to trace back the path from GOAL to Initial;
-  printf("Path from Initial to Goal\n");
-  //printf("%d - %d\n", obstacleCoordinates[goal[0]][goal[1]], obstacleCoordinates[goal[0]][goal[1]]%4);
+  fprintf(output_file, "Path from Initial to Goal\n");
   curr_x = goal[0];
   curr_y = goal[1];
 
@@ -157,103 +106,53 @@ void printPath(){
     if (obstacleCoordinates[curr_x][curr_y]%4 == 0)
     {
       obstacleCoordinates[curr_x][curr_y] = 4;
-      /*printf("%d, %d\n", curr_x, curr_y);
-      getchar();*/
-      //curr_x = ;
       curr_y = curr_y + 1;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 1)
     {
       obstacleCoordinates[curr_x][curr_y] = 5;
-      /*printf("%d, %d\n", curr_x, curr_y);
-      getchar();*/
-      //curr_x = ;
       curr_y = curr_y - 1;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 2)
     {
       obstacleCoordinates[curr_x][curr_y] = 6;
-      /*printf("%d, %d\n", curr_x, curr_y);
-      getchar();*/
       curr_x = curr_x + 1;
-      //curr_y = ;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 3)
     {
       obstacleCoordinates[curr_x][curr_y] = 7;
-      /*printf("%d, %d\n", curr_x, curr_y);*/
       curr_x = curr_x - 1;
-      //curr_y = ;
     }
-    //getchar();
   }
-
-  //printf("%d %d", goal[0], goal[1]);
-  // Printing.
   for(j = Y_COOR_SIZE - 1; j >= 0; j--){
-    printf("\t\t");
     for(i = 0; i < X_COOR_SIZE; i++){
       if(obstacleCoordinates[i][j] == 2){
-        printf("I ");
+        fprintf(output_file, "I ");
       }
       else if(i == goal[0] && j == goal[1]){
-        printf("G ");
+        fprintf(output_file, "G ");
       }
       else if(obstacleCoordinates[i][j] == 4){ // This is mod 0
-        printf("v ");
+        fprintf(output_file, "v ");
       }
       else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
-        printf("^ ");
+        fprintf(output_file, "^ ");
       }
       else if(obstacleCoordinates[i][j] == 6){ // Mod 2
-        printf("< ");
+        fprintf(output_file, "< ");
       }
       else if(obstacleCoordinates[i][j] ==  7){ // Mod 3
-        printf("> ");
+        fprintf(output_file, "> ");
       }
       else if(obstacleCoordinates[i][j] == 1){
-        printf("@ ");
+        fprintf(output_file, "@ ");
       }
       else{
-        printf(". ");//, obstacleCoordinates[i][j]);
+        fprintf(output_file, ". ");
       }
     }
-    printf("\n");
+    fprintf(output_file, "\n");
   }
-
-  /*printf("\n\n");
-
-  for(i = 0; i < X_COOR_SIZE; i++){
-    printf("\t\t");
-    for(j = 0; j < Y_COOR_SIZE; j++){
-      if(obstacleCoordinates[i][j] == 2){
-        printf("I ");
-      }
-      else if(i == goal[0] && j == goal[1]){
-        printf("G ");
-      }
-      else if(obstacleCoordinates[i][j] == 4){ // This is mod 0
-        printf("< ");
-      }
-      else if(obstacleCoordinates[i][j] == 5 ){ // This is mod 1
-        printf("> ");
-      }
-      else if(obstacleCoordinates[i][j] == 6){ // Mod 2
-        printf("^ ");
-      }
-      else if(obstacleCoordinates[i][j] ==  7){ // Mod 3
-        printf("v ");
-      }
-      else if(obstacleCoordinates[i][j] == 1){
-        printf("@ ");
-      }
-      else{
-        printf(". ");//, obstacleCoordinates[i][j]);
-      }
-    }
-    printf("\n");
-  }*/
-
 }
 
 void removeEnter(char* buffer){
@@ -285,15 +184,6 @@ int traceObstacle(int x1, int y1, int x2, int y2){
   int i;
   int j = temp_obstacle_count;
   int temp;
-  /*Idea:
-  y - y1 = m ( x - x1)
-  y - y1 = [(y2 - y1)/(x2 - x1)]*(x - x1)
-  y = [ [(y2 - y1)/(x2 - x1)]*(x - x1) ] + y1
-  Given an x, may formula na ako for y, for all x that are natural numbers from x1 -> x2
-  So magkakaroon ako ng y floats (or maybe natural numbers as well).
-  I'll have x-y pairs ngayon. I will store them all.
-  */
-  //printf("(%d,%d) -> (%d,%d)\n", x1, y1, x2, y2);
 
   // Case 1: Slope is undefined...
   if( x1 == x2 )
@@ -308,14 +198,11 @@ int traceObstacle(int x1, int y1, int x2, int y2){
     }
 
     else if(y1 == y2){ // If vertex is same
-      /// obstacleCoordinates[x1][y1] = 1;
       obstacleCoordinates[x1][y1] = 1;
     }
 
     // CASE 1: Slope is zero
     for(i = y1; i <= y2; i++){
-      // obstacleCoordinates[x1][i] = 1;
-      //printf("Marking: %d %d\n", x1, i);
       obstacleCoordinates[x1][i] = 1;
     }
   }
@@ -330,8 +217,6 @@ int traceObstacle(int x1, int y1, int x2, int y2){
       y2 = temp;
     }
     for(i = x1; i <= x2; i++){
-      //printf("%d %d %d %d", x1, y1, x2, y2);
-      //printf("Slope: %f, x = %d, y = %f\n", (y2 - y1)*(1.0)/(x2 - x1), i, ((((y2 - y1)*(1.0)/(x2 - x1))*(i - x1)) + y1));
       temp_obstacle[temp_obstacle_count][0] = i;
       temp_obstacle[temp_obstacle_count][1] = ((y2 - y1)*(1.0)/(x2 - x1))*(i - x1) + y1;
       temp_obstacle_count++;
@@ -340,14 +225,6 @@ int traceObstacle(int x1, int y1, int x2, int y2){
 }
 
 void findObstacles(){
-  /* Idea:
-    Kapag nakuha mo na lahat nung edges nung polygon,
-    Saka natin itrace from bottom to top, from x1 -> x2
-    Find (x1, __) // Lowest -> I-round up yung float dito
-    Find (x1, __) // Highest -> I-round down
-    Kailangan natin yung mga vertex enclosed. Kaya round-up sa lowest tapos round-down sa highest.
-    Magiging natural number na i-coconsider na sa coordinate system natin.
-  */
   int i,j,k,l;
   int x1, x2; // This will be values for the boundaries of x.
   float y1, y2; // This will be values for the boundaries of y.
@@ -364,6 +241,7 @@ void findObstacles(){
         traceObstacle(vertices[i][j][0], vertices[i][j][1], vertices[i][0][0], vertices[i][0][1]);
       }
     }
+
     /*After tracing the sides of the polygon, we may now mark the enclosed coordinates of obstacles. */
     // Get range of x1 and x2 by finding least and highest value of x
     x1 = 999999;
@@ -376,7 +254,7 @@ void findObstacles(){
         x2 = temp_obstacle[j][0];
       }
     }
-    //printf("Lowest value is %d, Highest value is %d", x1, x2);
+
     for(j=x1; j<=x2; j++){   // Start from x1 -> x2
       // Find y1 (lowest) and y2 (highest) points paired with x1...
       y1 = 999999;
@@ -392,100 +270,14 @@ void findObstacles(){
           }
         }
       }
-      //printf("For %d, lowest value is %f, highest value is %f.\n", j, y1, y2);
+
       // Now that we know y, let's fill the obstacles
-      if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged.
+      if(ceil(y1)!= floor(y2)){ //Round up y1 == Round down y2, only (j,y1) is tagged
         for(k=ceil(y1); k<=floor(y2); k++)
         obstacleCoordinates[j][k] = 1;
       }
-      else{ // If yun lang yung point, this means na para siyang cusp na sideways, yun lang ang obstacle sa point na iyon.
+      else{
         obstacleCoordinates[j][(int)y1] = 1;
-      }
-    }
-
-    k = 0;
-    for(j=0; j<X_COOR_SIZE; j++){
-      for(l=0; l<Y_COOR_SIZE; l++){
-        if(obstacleCoordinates[j][l] == 1){
-          //printf("(%d,%d)\n", j, l);
-          k++;
-        }
-      }
-    }
-    //printf("\n%d - %d,%d\n", i, vertices[i][0][0], vertices[i][0][1]);
-    //printf("\n%d\n", k);
-  }
-}
-
-/* =============== TESTING FUNCTION =============== */
-void test1(){
-  int choice_Q = 1;
-  int input1, input2;
-
-  // For Stack 1
-  LIST_NODE* S1_current;
-  NODE_POINTER S1_TOP;
-  S1_TOP.node = NULL;
-
-  // For Queue 1
-  LIST_NODE* Q1_current;
-  NODE_POINTER Q1_FRONT;
-  NODE_POINTER Q1_REAR;
-  Q1_FRONT.node = NULL;
-  Q1_REAR.node = NULL;
-
-  while(choice_Q != 0){
-    printf("\n[0] Quit\n[1] Enqueue\n[2] Dequeue\n[3] See Front of Queue\n[4] See Rear of Queue\n[5] Check if Queue Empty\n[6] Push\n[7] Pop\n[8] See Top of Stack\n[9] Check if Stack Empty\nEnter choice: ");
-    scanf("%d", &choice_Q);
-    getchar();
-
-    if(choice_Q == 1){
-      printf("\nEnter x: ");
-      scanf("%d", &input1);
-      getchar();
-      printf("Enter y: ");
-      scanf("%d", &input2);
-      getchar();
-      enqueue(&Q1_FRONT, &Q1_REAR, input1, input2);
-    }
-    else if(choice_Q == 2){
-      dequeue(&Q1_FRONT, &Q1_REAR);
-    }
-    else if(choice_Q == 3){
-      checkFront(Q1_FRONT);
-    }
-    else if(choice_Q == 4){
-      checkRear(Q1_REAR);
-    }
-    else if(choice_Q == 5){
-      printf("Is Queue Empty? ");
-      if(isEmptyQueue(&Q1_REAR, &Q1_FRONT) == 1)
-        printf("\nYes.");
-      else{
-        printf("\nNo.");
-      }
-    }
-    else if(choice_Q == 6){
-      printf("\nEnter x: ");
-      scanf("%d", &input1);
-      getchar();
-      printf("Enter y: ");
-      scanf("%d", &input2);
-      getchar();
-      push(&S1_TOP, input1, input2);
-    }
-    else if(choice_Q == 7){
-      pop(&S1_TOP);
-    }
-    else if(choice_Q == 8){
-      checkTop(S1_TOP);
-    }
-    else if(choice_Q == 9){
-      printf("Is Stack Empty? ");
-      if(isEmptyStack(&S1_TOP) == 1)
-        printf("\nYes.");
-      else{
-        printf("\nNo.");
       }
     }
   }
@@ -508,8 +300,6 @@ int main(){
 
   front.node = NULL;
   rear.node = NULL;
-
-  //test1();  // Call this to Test for Queue and Stack...
 
   /* File Parsing, Initialization, Input Validation*/
   fp = fopen("input.txt", "r");
@@ -562,62 +352,53 @@ int main(){
         verticesSize[i-2] = (k/2);
       }
     }
-    polygonCount = i-2;                  // (i - 2) Dahil minus initial, goal.
+    polygonCount = i-2;
     findObstacles();                     // This function maps all coordinates enclosed by the obstacles.
     if(flag == 1){
       printf("Please fix input file.\n");
     }
 
-    flag = BFS();
+    output_file = fopen("output.txt", "w");
 
+    flag = BFS();
     if(flag == 0)
-      printf("Initial is Goal State.\n");
+      fprintf(output_file, "BFS: Initial is Goal State.\n");
     else if(flag == 1){
-      printf("BFS Successful.\n");
+      fprintf(output_file, "BFS Successful.\n");
     }
     else{
-      printf("BFS Unsuccessful.\n");
+      fprintf(output_file, "BFS Unsuccessful.\n");
     }
     printPath();
 
     flag = DFS();
-
     if(flag == 0)
-      printf("Initial is Goal State.\n");
+      fprintf(output_file, "\nDFS: Initial is Goal State.\n");
     else if(flag == 1){
-      printf("DFS Successful.\n");
+      fprintf(output_file, "\nDFS Successful.\n");
     }
     else{
-      printf("DFS Unsuccessful.\n");
+      fprintf(output_file, "\nDFS Unsuccessful.\n");
     }
     printPath();
-
-    flag = AStar();
 
     if(flag == 0){
-      printf("A* Unsuccessful\n");
+      fprintf(output_file, "\nAStar: Initial is Goal State.\n");
     }
-    else if(flag == 1){
-      printf("A* Successful\n");
+    else{
+      flag = AStar();
+      if(flag == 0){
+        fprintf(output_file, "\nA* Unsuccessful\n");
+      }
+      else if(flag == 1){
+        fprintf(output_file, "\nA* Successful\n");
+      }
+      printPath();
     }
-    printPath();
-
   }
+
+  fclose(output_file);
 }
-
-/* Search Algorithm from Slides
-1. If GOAL?(initial-state) then return initial-state
-2. INSERT(initial-node, FRINGE)
-3. Repeat:
-  a. If FRINGE is empty then return failure
-  b. n <- REMOVE(FRINGE)
-  c. s <- STATE(n)
-  d. For every state s' in SUCCESSORS(s)
-    i. Create a node n'
-    ii. If GOAL?(s') then retur path or goal state
-    iii. INSERT(n', FRINGE)
-
-*/
 
 /* =============== Depth-First Search =============== */
 
@@ -652,7 +433,6 @@ int isSuccessor(int x, int y){
   return 1;
 }
 
-// We check if a node is indeed a successor.
 int isSuccessor_BFS(int x, int y){
   // It is a successor if it is an unexplored node.
   // Still inbounds
@@ -672,22 +452,18 @@ int isSuccessor_BFS(int x, int y){
 
 void successor_AStar(int x, int y, int path_cost){
   if(obstacleCoordinates[x][y - 1] != 1 && (y - 1) >= 0 && obstacleCoordinates[x][y - 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] != 2){
-    //printf("inserting: %d %d %d\n", x, y - 1, obstacleCoordinates[x][y-1]);
     obstacleCoordinates[x][y - 1] = (-1)*((4 * num_runs) + 4);
     insert_AStar(&AStar_top, x, y - 1, path_cost);
   }
   if(obstacleCoordinates[x][y + 1] != 1 && (y + 1) < 200 && obstacleCoordinates[x][y + 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] != 2){
-    //printf("inserting: %d %d %d\n", x, y + 1,  obstacleCoordinates[x][y + 1]);
     obstacleCoordinates[x][y + 1] = (-1)*((4 * num_runs) + 5);
     insert_AStar(&AStar_top, x, y + 1, path_cost);
   }
   if(obstacleCoordinates[x + 1][y] != 1 && (x + 1) < 400 && obstacleCoordinates[x + 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] != 2){
-    //printf("inserting: %d %d %d\n", x + 1, y,  obstacleCoordinates[x + 1][y]);
     obstacleCoordinates[x + 1][y] = (-1)*((4 * num_runs) + 7);
     insert_AStar(&AStar_top, x + 1, y, path_cost);
   }
   if(obstacleCoordinates[x - 1][y] != 1 && (x - 1) >= 0 && obstacleCoordinates[x - 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] != 2){
-    //printf("inserting: %d %d %d\n", x - 1, y,  obstacleCoordinates[x - 1][y]);
     obstacleCoordinates[x - 1][y] = (-1)*((4 * num_runs) + 6);
     insert_AStar(&AStar_top, x - 1, y, path_cost);
   }
@@ -708,7 +484,6 @@ int BFS(){
   int j;
   int flag;
 
-  //printf("\nNum Runs: %d\n", num_runs);
   num_runs++;
 
   // Set initial and goal to a certain value
@@ -728,56 +503,24 @@ int BFS(){
       return -1; // Failure.
     }
 
-     // Print optional...
-    /*
-    printf("PUTA\n");
-    for(i = 0; i<X_COOR_SIZE; i++){
-      for(j=0; j<Y_COOR_SIZE;j++){
-        printf("%d ", obstacleCoordinates[i][j]);
-      }
-      printf("\n");
-    }
-    */
-
-    //n = REMOVE(FRINGE)
     if(dequeue(&front, &rear) != 0){
       curr_x = variable1;
       curr_y = variable2;
-
     }
-    // printf("\nDEQUEUE: %d, %d\n", curr_x, curr_y);
-    // printf("\n");
 
     flag = (isVisited_BFS(curr_x, curr_y) != 1);
 
-    /*
-    if(flag == 0){
-      printf("Is already explored.");
-    }
-    */
-
-    //checkFront(front);
-    //checkRear(rear);
-
-    //printf("%d, %d\n", variable1, variable2);
-
     if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
     {
-      //printf("Pasok dito.");
-
       if(obstacleCoordinates[curr_x][curr_y] != 2)
         obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
 
-      //s = STATE(n)
       if(isSuccessor_BFS(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
         if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
           return 1;
         }
         enqueue(&front, &rear, curr_x,curr_y - 1);
-        //printf("Enqueue %d, %d", curr_x,curr_y - 1);
-        //printf("\nEnqueue: %d, %d\n", curr_x, curr_y-1);
-        //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
       if(isSuccessor_BFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
@@ -786,8 +529,6 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear, curr_x,curr_y + 1);
-        //printf("\nEnqueue: %d, %d\n", curr_x, curr_y+1);
-        //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
       if(isSuccessor_BFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
@@ -796,8 +537,6 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear, curr_x-1,curr_y);
-        //printf("\nEnqueue: %d, %d\n", curr_x-1, curr_y);
-        //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
       if(isSuccessor_BFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
@@ -806,14 +545,9 @@ int BFS(){
           return 1;
         }
         enqueue(&front, &rear,curr_x+1,curr_y);
-        //printf("\nEnqueue: %d, %d\n", curr_x+1, curr_y);
-        //printf("Nag-right: %d\n", (4*num_runs) + 7);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
-      //checkFront(front);
-      //checkRear(rear);
     }
-    //getchar();
   }
 }
 
@@ -829,7 +563,6 @@ int DFS(){
   int j;
   int flag;
 
-  //printf("\nNum Runs: %d\n", num_runs);
   num_runs++;
 
   // Set initial and goal to a certain value
@@ -848,48 +581,23 @@ int DFS(){
     if(isEmptyStack(&stack_top) == 1){
       return -1; // Failure.
     }
-
-     // Print optional...
-     /*
-    for(i = 0; i<X_COOR_SIZE; i++){
-      for(j=0; j<Y_COOR_SIZE;j++){
-        printf("%d ", obstacleCoordinates[i][j]);
-      }
-      printf("\n");
-    }
-    */
-
-
-    //n = REMOVE(FRINGE)
     pop(&stack_top);
     curr_x = variable1;
     curr_y = variable2;
-    //printf("\nPOPPED: %d, %d\n", curr_x, curr_y);
 
     flag = (isVisited(curr_x, curr_y) != 1);
-
-    /*if(flag == 0){
-      printf("Is already explored.");
-    }*/
-
-    //checkTop(stack_top);
-    //printf("%d, %d\n", variable1, variable2);
-
 
     if( flag || obstacleCoordinates[curr_x][curr_y] == 2)
     {
       if(obstacleCoordinates[curr_x][curr_y] != 2)
         obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
 
-      //s = STATE(n)
       if(isSuccessor(curr_x, curr_y-1) == 1){ // Left yung action. Galing right.
         if(curr_x == goal[0] && (curr_y - 1) == goal[1]){
           obstacleCoordinates[goal[0]][goal[1]] = ((4*num_runs) + 4);
           return 1;
         }
         push(&stack_top,curr_x,curr_y - 1);
-        //printf("\nPushed: %d, %d\n", curr_x, curr_y-1);
-        //printf("Nag-up: %d\n", (4*num_runs) + 4);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
       }
       if(isSuccessor(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
@@ -898,8 +606,6 @@ int DFS(){
           return 1;
         }
         push(&stack_top,curr_x,curr_y + 1);
-        //printf("\nPushed: %d, %d\n", curr_x, curr_y+1);
-        //printf("Nag-down: %d\n", (4*num_runs) + 5);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
       }
       if(isSuccessor(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
@@ -908,8 +614,6 @@ int DFS(){
           return 1;
         }
         push(&stack_top,curr_x-1,curr_y);
-        //printf("\nPushed: %d, %d\n", curr_x-1, curr_y);
-        //printf("Nag-left: %d\n", (4*num_runs) + 6);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
       }
       if(isSuccessor(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
@@ -918,12 +622,9 @@ int DFS(){
           return 1;
         }
         push(&stack_top,curr_x+1,curr_y);
-        //printf("\nPushed: %d, %d\n", curr_x+1, curr_y);
-        //printf("Nag-right: %d\n", (4*num_runs) + 7);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
       }
     }
-    //getchar();
   }
 }
 
@@ -937,28 +638,6 @@ int AStar(){
 
   obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
   insert_AStar(&AStar_top, curr_x, curr_y, path_cost);
-  /*printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 0, 10, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  pop(&AStar_top);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 0, 10, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 5, 0, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 4, 4, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 0, 5, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);
-
-  insert_AStar(&AStar_top, 28, 28, path_cost);
-  printf("x: %d y: %d distance: %.2lf\n", AStar_top.node->x, AStar_top.node->y, AStar_top.node->distance + AStar_top.node->path_cost);*/
 
   while(1){
     if(isEmptyStack(&AStar_top) == 1){
@@ -971,15 +650,12 @@ int AStar(){
     path_cost = variable3;
 
     obstacleCoordinates[curr_x][curr_y] = (-1) * obstacleCoordinates[curr_x][curr_y];
-    //printf("curr x:%d, curr y: %d, path cost: %d representation: %d\n", curr_x, curr_y, path_cost, obstacleCoordinates[curr_x][curr_y]);
 
     if(curr_x == goal[0] && curr_y == goal[1]){
       return 1;
     }
 
     successor_AStar(curr_x, curr_y, path_cost + 1);
-
-    //getchar();
   }
 }
 
@@ -1029,15 +705,12 @@ int pop(NODE_POINTER* TOP){
 
     free(temp.node);                    // Free the popped node.
 
-    //printf("\nPOPS(%d,%d)", variable1, variable2);
-
     return 1;
   }
 }
 
 int checkTop(NODE_POINTER TOP){
   if(TOP.node == NULL){
-    //printf("\nTOP points to NULL.");
     variable1 = -1;
     variable2 = -1;
     return 0;
@@ -1045,7 +718,6 @@ int checkTop(NODE_POINTER TOP){
 
   variable1 = TOP.node->x;
   variable2 = TOP.node->y;
-  //printf("\nTOP points to (%d, %d)", TOP.node->x, TOP.node->y);
   return 1;
 }
 
@@ -1103,7 +775,6 @@ int dequeue(NODE_POINTER* FRONT, NODE_POINTER* REAR){
       (current.node)->next = NULL;
     }
 
-    //printf("\nDEQUEUES: (%d,%d)", variable1, variable2);
     return 1;
   }
 }
@@ -1148,7 +819,6 @@ void insert_AStar(NODE_POINTER* TOP, int x1, int y1, int path_cost){
 
   new->path_cost = path_cost;
   new->distance = distance;
-  //printf("x1: %d, y1: %d, distance: %.2lf\n", x1, y1, distance);
   if(isEmptyStack(TOP) == 1){
     (*TOP).node = new;
     (*TOP).node->next = NULL;
@@ -1170,13 +840,6 @@ void insert_AStar(NODE_POINTER* TOP, int x1, int y1, int path_cost){
     else{
       beta.node->next = new;
     }
-
-    /*alpha.node = (*TOP).node;
-    while(alpha.node != NULL){
-      printf("(%d, %d), ", alpha.node->x, alpha.node->y);
-      alpha.node = alpha.node->next;
-    }
-    printf("\n");*/
   }
 }
 
