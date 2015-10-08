@@ -48,6 +48,10 @@ int variable1;
 int variable2;
 int variable3;
 int successors[4];
+int expanded_nodes;
+int cost;
+clock_t start;
+clock_t end;
 
 FILE* output_file;
 
@@ -99,6 +103,7 @@ void printPath(){
   // Finding the successful path...
   // We need to trace back the path from GOAL to Initial;
   fprintf(output_file, "Path from Initial to Goal\n");
+  cost = 0;
   curr_x = goal[0];
   curr_y = goal[1];
 
@@ -107,23 +112,30 @@ void printPath(){
     {
       obstacleCoordinates[curr_x][curr_y] = 4;
       curr_y = curr_y + 1;
+      cost++;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 1)
     {
       obstacleCoordinates[curr_x][curr_y] = 5;
       curr_y = curr_y - 1;
+      cost++;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 2)
     {
       obstacleCoordinates[curr_x][curr_y] = 6;
       curr_x = curr_x + 1;
+      cost++;
     }
     else if (obstacleCoordinates[curr_x][curr_y]%4 == 3)
     {
       obstacleCoordinates[curr_x][curr_y] = 7;
       curr_x = curr_x - 1;
+      cost++;
     }
   }
+
+  fprintf(output_file, "Cost of solution: %d\n", cost);
+
   for(j = Y_COOR_SIZE - 1; j >= 0; j--){
     for(i = 0; i < X_COOR_SIZE; i++){
       if(obstacleCoordinates[i][j] == 2){
@@ -148,7 +160,7 @@ void printPath(){
         fprintf(output_file, "@ ");
       }
       else{
-        fprintf(output_file, ". ");
+        fprintf(output_file, "  ");
       }
     }
     fprintf(output_file, "\n");
@@ -228,6 +240,8 @@ void findObstacles(){
   int i,j,k,l;
   int x1, x2; // This will be values for the boundaries of x.
   float y1, y2; // This will be values for the boundaries of y.
+  FILE* file;
+
   for(i=0; i < polygonCount; i++){
     /* Reinitialize temp_obstacle here*/
     temp_obstacle_count = 0;
@@ -281,6 +295,26 @@ void findObstacles(){
       }
     }
   }
+
+  file = fopen("grid_diagram.txt", "w");
+  for(j = Y_COOR_SIZE - 1; j >= 0; j--){
+    for(i = 0; i < X_COOR_SIZE; i++){
+      if(i == initial[0] && j == initial[0]){
+        fprintf(file, "I ");
+      }
+      else if(i == goal[0] && j == goal[1]){
+        fprintf(file, "G ");
+      }
+      else if(obstacleCoordinates[i][j] == 1){
+        fprintf(file, "@ ");
+      }
+      else{
+        fprintf(file, "  ");
+      }
+    }
+    fprintf(file, "\n");
+  }
+  fclose(file);
 }
 
 /* =============== MAIN WORKING FUNCTION =============== */
@@ -292,17 +326,22 @@ int main(){
   int j;
   int k;
   int flag = 0;
+  double time_spent;
 
   char buffer[ARRAYSPACE_SMALL];
   char strtokBuffer[2] = ",";
   char strtokBuffer2[4] = "),(";
   char *token;
+  char filename[32];
 
   front.node = NULL;
   rear.node = NULL;
 
   /* File Parsing, Initialization, Input Validation*/
-  fp = fopen("input.txt", "r");
+  printf("Enter filename here: ");
+  fgets(filename, 32, stdin);
+  removeEnter(filename);
+  fp = fopen(filename, "r");
   if(fp == NULL)
     perror("Error opening file.");
   else{
@@ -360,40 +399,54 @@ int main(){
 
     output_file = fopen("output.txt", "w");
 
+    start = clock();
     flag = BFS();
-    if(flag == 0)
+    end = clock();
+    time_spent = (end - start)/CLOCKS_PER_SEC;
+    if(flag == 0){
       fprintf(output_file, "BFS: Initial is Goal State.\n");
+      printPath();
+    }
     else if(flag == 1){
-      fprintf(output_file, "BFS Successful.\n");
+      fprintf(output_file, "BFS Successful with number of expanded_nodes: %d and running time: %lf\n", expanded_nodes, time_spent);
+      printPath();
     }
     else{
       fprintf(output_file, "BFS Unsuccessful.\n");
     }
-    printPath();
 
+    start = clock();
     flag = DFS();
-    if(flag == 0)
+    end = clock();
+    time_spent = (end - start)/CLOCKS_PER_SEC;
+    if(flag == 0){
       fprintf(output_file, "\nDFS: Initial is Goal State.\n");
+      printPath();
+    }
     else if(flag == 1){
-      fprintf(output_file, "\nDFS Successful.\n");
+      fprintf(output_file, "\nDFS Successful with number of expanded_nodes: %d and running time: %lf\n", expanded_nodes, time_spent);
+      printPath();
     }
     else{
       fprintf(output_file, "\nDFS Unsuccessful.\n");
     }
-    printPath();
 
     if(flag == 0){
       fprintf(output_file, "\nAStar: Initial is Goal State.\n");
+      printPath();
     }
     else{
+      start = clock();
       flag = AStar();
+      end = clock();
+      time_spent = (end - start)/CLOCKS_PER_SEC;
       if(flag == 0){
         fprintf(output_file, "\nA* Unsuccessful\n");
       }
       else if(flag == 1){
-        fprintf(output_file, "\nA* Successful\n");
+        fprintf(output_file, "\nA* Successful with number of expanded_nodes: %d and running time: %lf\n", expanded_nodes, time_spent);
+        printPath();
       }
-      printPath();
     }
   }
 
@@ -454,18 +507,22 @@ void successor_AStar(int x, int y, int path_cost){
   if(obstacleCoordinates[x][y - 1] != 1 && (y - 1) >= 0 && obstacleCoordinates[x][y - 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y - 1] != 2){
     obstacleCoordinates[x][y - 1] = (-1)*((4 * num_runs) + 4);
     insert_AStar(&AStar_top, x, y - 1, path_cost);
+    expanded_nodes++;
   }
   if(obstacleCoordinates[x][y + 1] != 1 && (y + 1) < 200 && obstacleCoordinates[x][y + 1] < ((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x][y + 1] != 2){
     obstacleCoordinates[x][y + 1] = (-1)*((4 * num_runs) + 5);
     insert_AStar(&AStar_top, x, y + 1, path_cost);
+    expanded_nodes++;
   }
   if(obstacleCoordinates[x + 1][y] != 1 && (x + 1) < 400 && obstacleCoordinates[x + 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x + 1][y] != 2){
     obstacleCoordinates[x + 1][y] = (-1)*((4 * num_runs) + 7);
     insert_AStar(&AStar_top, x + 1, y, path_cost);
+    expanded_nodes++;
   }
   if(obstacleCoordinates[x - 1][y] != 1 && (x - 1) >= 0 && obstacleCoordinates[x - 1][y] < ((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] > (-1)*((4 * num_runs) + 4) && obstacleCoordinates[x - 1][y] != 2){
     obstacleCoordinates[x - 1][y] = (-1)*((4 * num_runs) + 6);
     insert_AStar(&AStar_top, x - 1, y, path_cost);
+    expanded_nodes++;
   }
 }
 
@@ -483,6 +540,7 @@ int BFS(){
   int i;
   int j;
   int flag;
+  NODE_POINTER temp;
 
   num_runs++;
 
@@ -491,11 +549,13 @@ int BFS(){
   obstacleCoordinates[goal[0]][goal[1]] = 3;
 
   // 1. If GOAL?(initial-state) then return initial-state
-  if(initial[0] == goal[0] && initial[1] == goal[1])
+  if(initial[0] == goal[0] && initial[1] == goal[1]){
     return 0;
+  }
 
   // 2. INSERT(initial-node,FRINGE)
   enqueue(&front, &rear, curr_x, curr_y);  // Enqueue initial point
+  expanded_nodes = 1;
 
   while(1)
   {
@@ -522,6 +582,7 @@ int BFS(){
         }
         enqueue(&front, &rear, curr_x,curr_y - 1);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+        expanded_nodes++;
       }
       if(isSuccessor_BFS(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
         if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
@@ -530,6 +591,7 @@ int BFS(){
         }
         enqueue(&front, &rear, curr_x,curr_y + 1);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
+        expanded_nodes++;
       }
       if(isSuccessor_BFS(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
         if((curr_x-1) == goal[0] && curr_y == goal[1]){
@@ -538,6 +600,7 @@ int BFS(){
         }
         enqueue(&front, &rear, curr_x-1,curr_y);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
+        expanded_nodes++;
       }
       if(isSuccessor_BFS(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
         if((curr_x+1) == goal[0] && curr_y == goal[1]){
@@ -546,6 +609,7 @@ int BFS(){
         }
         enqueue(&front, &rear,curr_x+1,curr_y);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+        expanded_nodes++;
       }
     }
   }
@@ -575,6 +639,7 @@ int DFS(){
 
   // 2. INSERT(initial-node,FRINGE)
   push(&stack_top,curr_x,curr_y);
+  expanded_nodes = 1;
 
   while(1)
   {
@@ -599,6 +664,7 @@ int DFS(){
         }
         push(&stack_top,curr_x,curr_y - 1);
         obstacleCoordinates[curr_x][curr_y-1] = (-1)*((4*num_runs) + 4);
+        expanded_nodes++;
       }
       if(isSuccessor(curr_x, curr_y+1) == 1){ // Right yung action. Galing left.
         if(curr_x == goal[0] && (curr_y + 1) == goal[1]){
@@ -607,6 +673,7 @@ int DFS(){
         }
         push(&stack_top,curr_x,curr_y + 1);
         obstacleCoordinates[curr_x][curr_y+1] = (-1)*((4*num_runs) + 5);
+        expanded_nodes++;
       }
       if(isSuccessor(curr_x-1,curr_y) == 1){ // Up yung action.Galing from down.
         if((curr_x-1) == goal[0] && curr_y == goal[1]){
@@ -615,6 +682,7 @@ int DFS(){
         }
         push(&stack_top,curr_x-1,curr_y);
         obstacleCoordinates[curr_x-1][curr_y] = (-1)*((4*num_runs) + 6);
+        expanded_nodes++;
       }
       if(isSuccessor(curr_x+1,curr_y) == 1){ // Down yung action. Galing from Up.
         if((curr_x+1) == goal[0] && curr_y == goal[1]){
@@ -623,6 +691,7 @@ int DFS(){
         }
         push(&stack_top,curr_x+1,curr_y);
         obstacleCoordinates[curr_x+1][curr_y] = (-1)*((4*num_runs) + 7);
+        expanded_nodes++;
       }
     }
   }
@@ -638,6 +707,7 @@ int AStar(){
 
   obstacleCoordinates[curr_x][curr_y] = (-1)*obstacleCoordinates[curr_x][curr_y];
   insert_AStar(&AStar_top, curr_x, curr_y, path_cost);
+  expanded_nodes = 1;
 
   while(1){
     if(isEmptyStack(&AStar_top) == 1){
