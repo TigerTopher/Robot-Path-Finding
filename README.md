@@ -1,4 +1,7 @@
 # CS 180 Machine Problem 1
+
+This is our CS 180 Artificial Intelligence Machine Problem 1 which is all about Robot path finding using Depth-First Search, Breadth-First Search, and A* Search implemented in C.
+
 * Programmed by: jolotan416 and TigerTopher
 * CS 180 THV
 * Submitted to: Professor Raquel
